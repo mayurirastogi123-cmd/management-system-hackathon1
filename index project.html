@@ -1,0 +1,3043 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100 dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subtrix | AI-Powered Subscription OS & Digital Twin</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Space Grotesk"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            // Reverted to clean two solid colors: Indigo (#4f46e5) and Emerald (#059669)
+            brand: {
+              DEFAULT: '#4f46e5',
+              hover: '#4338ca',
+              light: '#e0e7ff',
+              dark: '#312e81'
+            },
+            accent: {
+              DEFAULT: '#059669',
+              hover: '#047857',
+              light: '#d1fae5',
+              dark: '#064e3b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Clean Solid Scrollbars */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+    .dark ::-webkit-scrollbar-thumb { background: #334155; }
+  </style>
+</head>
+<body class="h-full flex flex-col font-sans antialiased bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-150">
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- ================= 1. CLEAN TOP NAVBAR ================= -->
+  <header class="h-14 px-4 sm:px-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between z-30 shrink-0">
+    <!-- Brand Logo & Navigation Menu Drawer Toggle -->
+    <div class="flex items-center gap-3">
+      <button onclick="toggleSidebar()" id="sidebarToggleBtn" title="Toggle Navigation Menu" class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition border border-slate-200 dark:border-slate-700 flex items-center justify-center">
+        <i data-lucide="menu" id="sidebarMenuIcon" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Subtrix Brand Mark (Crisp, High-Visibility Vector matching reference) -->
+      <div class="flex items-center gap-2.5 cursor-pointer select-none py-1 group" onclick="switchTab('dashboard')">
+        <div class="h-9 w-9 p-1 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-center shrink-0 shadow-xs">
+          <svg class="h-7 w-7 overflow-visible" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="sxEmeraldGrad" x1="10%" y1="0%" x2="95%" y2="70%">
+                <stop offset="0%" stop-color="#34d399" />
+                <stop offset="60%" stop-color="#10b981" />
+                <stop offset="100%" stop-color="#059669" />
+              </linearGradient>
+              <linearGradient id="sxIndigoGrad" x1="15%" y1="10%" x2="95%" y2="100%">
+                <stop offset="0%" stop-color="#818cf8" />
+                <stop offset="45%" stop-color="#6366f1" />
+                <stop offset="100%" stop-color="#4338ca" />
+              </linearGradient>
+              <linearGradient id="sxFoldShadow" x1="20%" y1="20%" x2="80%" y2="90%">
+                <stop offset="0%" stop-color="#047857" />
+                <stop offset="50%" stop-color="#1e1b4b" />
+                <stop offset="100%" stop-color="#3730a3" />
+              </linearGradient>
+            </defs>
+
+            <!-- Floating Green Pixels (Top Left) -->
+            <rect x="12" y="22" width="9" height="9" rx="2" fill="#10b981" />
+            <rect x="7" y="34" width="7" height="7" rx="1.5" fill="#059669" />
+            <rect x="16" y="38" width="6" height="6" rx="1.2" fill="#047857" />
+
+            <!-- Floating Purple Pixels (Bottom Right) -->
+            <rect x="79" y="44" width="6.5" height="6.5" rx="1.5" fill="#818cf8" />
+            <rect x="88" y="52" width="6" height="6" rx="1.2" fill="#6366f1" />
+            <rect x="77" y="56" width="9" height="9" rx="2" fill="#4338ca" />
+
+            <!-- Lower Loop (Indigo / Purple Ribbon) -->
+            <path d="M 64 36 C 76 42, 80 56, 73 68 C 67 78, 54 80, 42 80 L 22 80 C 15 80, 13 74, 18 67 L 32 48 C 36 43, 42 42, 50 42 L 64 42 Z" fill="url(#sxIndigoGrad)" />
+
+            <!-- Dynamic Ribbon Fold Edge -->
+            <path d="M 32 48 L 52 48 C 66 48, 76 56, 70 70 C 65 62, 56 56, 44 56 L 27 56 Z" fill="url(#sxFoldShadow)" opacity="0.95" />
+
+            <!-- Upper Loop (Emerald Ribbon) -->
+            <path d="M 27 46 C 22 39, 24 26, 36 17 C 49 8, 80 8, 87 9 C 91 9, 91 14, 86 19 L 71 33 C 67 37, 60 37, 52 37 L 38 37 C 32 37, 28 41, 27 46 Z" fill="url(#sxEmeraldGrad)" />
+          </svg>
+        </div>
+
+        <!-- Custom Styled Wordmark with high-contrast dual-colored 'X' -->
+        <span class="font-extrabold text-base tracking-tight text-slate-900 dark:text-white flex items-center font-display leading-none">
+          Subtri
+          <span class="relative inline-flex items-center ml-0.5">
+            <span class="text-accent">X</span>
+            <span class="absolute -right-0.5 bottom-0 text-[10px] text-brand font-black">/</span>
+          </span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Controls: Multi-Language + Theme + Account (Currency shifted to next line toolbar) -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <!-- Role Perspective Switcher (Admin / Staff / Customer) -->
+      <div class="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
+        <button onclick="switchUserRole('admin')" id="roleBtn-admin" title="Admin - Full Control" class="px-2 py-1 rounded-md text-[10px] font-bold transition bg-brand text-white shadow-xs">
+          Admin
+        </button>
+        <button onclick="switchUserRole('staff')" id="roleBtn-staff" title="Staff - Operations & Assigned Portfolios" class="px-2 py-1 rounded-md text-[10px] font-bold transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+          Staff
+        </button>
+        <button onclick="switchUserRole('customer')" id="roleBtn-customer" title="Customer - Self-Service Portal" class="px-2 py-1 rounded-md text-[10px] font-bold transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+          Customer Portal
+        </button>
+      </div>
+
+      <!-- Language Selector (5 Languages) -->
+      <select id="globalLangSelect" onchange="changeGlobalLanguage(this.value)" class="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-[11px] font-semibold text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer">
+        <option value="en">🇺🇸 EN</option>
+        <option value="hi">🇮🇳 हिन्दी</option>
+        <option value="es">🇪🇸 ES</option>
+        <option value="fr">🇫🇷 FR</option>
+        <option value="de">🇩🇪 DE</option>
+      </select>
+
+      <!-- Theme Switcher -->
+      <button onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Theme" class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition border border-slate-200 dark:border-slate-700">
+        <i data-lucide="sun" id="sunIcon" class="w-3.5 h-3.5 hidden"></i>
+        <i data-lucide="moon" id="moonIcon" class="w-3.5 h-3.5"></i>
+      </button>
+
+      <!-- Account Profile Dropdown -->
+      <div class="relative">
+        <button onclick="toggleAccountMenu()" class="flex items-center gap-2 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
+          <div id="navAvatarBadge" class="w-7 h-7 rounded-md bg-brand text-white flex items-center justify-center font-bold text-[11px] font-display shadow-xs">
+            AD
+          </div>
+          <div class="hidden lg:block text-left pr-1 leading-none">
+            <div id="navUserName" class="text-xs font-semibold text-slate-800 dark:text-slate-200">Alex Drake</div>
+            <div id="navUserRole" class="text-[9px] text-slate-500 dark:text-slate-400 mt-0.5">RevOps Executive</div>
+          </div>
+          <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div id="accountMenuDropdown" class="hidden absolute right-0 mt-2 w-52 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl py-1.5 z-50 text-xs">
+          <div class="px-3.5 py-2 border-b border-slate-100 dark:border-slate-800">
+            <p id="dropUserName" class="font-semibold text-slate-800 dark:text-slate-200">Alex Drake</p>
+            <p id="dropUserEmail" class="text-[10px] text-slate-500 dark:text-slate-400 truncate font-mono">alex.drake@enterprise.io</p>
+          </div>
+          <button onclick="openAuthModal('signin'); toggleAccountMenu();" class="w-full text-left flex items-center gap-2 px-3.5 py-2 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">
+            <i data-lucide="key-round" class="w-3.5 h-3.5 text-brand"></i> Switch Account
+          </button>
+          <button onclick="switchTab('settings'); toggleAccountMenu();" class="w-full text-left flex items-center gap-2 px-3.5 py-2 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">
+            <i data-lucide="settings" class="w-3.5 h-3.5 text-slate-400"></i> Workspace Config
+          </button>
+          <button onclick="showToast('Audit report exported.', 'info'); toggleAccountMenu();" class="w-full text-left flex items-center gap-2 px-3.5 py-2 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">
+            <i data-lucide="shield" class="w-3.5 h-3.5 text-slate-400"></i> Audit Logs
+          </button>
+          <div class="border-t border-slate-100 dark:border-slate-800 my-1"></div>
+          <button onclick="handleSignOut(); toggleAccountMenu();" class="w-full text-left flex items-center gap-2 px-3.5 py-2 text-rose-600 dark:text-rose-400 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Sign Out
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= BODY WORKSPACE ================= -->
+  <div class="flex-1 flex overflow-hidden relative">
+
+    <!-- SIDEBAR BACKDROP OVERLAY -->
+    <div id="sidebarBackdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-30 transition-opacity duration-300 opacity-0 pointer-events-none"></div>
+
+    <!-- SLIDE-OVER SIDEBAR NAVIGATION -->
+    <aside id="mainSidebar" class="fixed top-14 bottom-0 left-0 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between shrink-0 select-none z-40 transition-transform duration-300 transform -translate-x-full shadow-2xl">
+      <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500" data-i18n="menu_title">Navigation Menu</span>
+        <button onclick="toggleSidebar(false)" class="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="p-3 space-y-1 overflow-y-auto flex-1">
+        <div class="px-2 pt-1 pb-1 text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500" data-i18n="section_core">
+          Core Operating Pillars
+        </div>
+
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors bg-brand text-white shadow-xs">
+          <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
+          <span data-i18n="nav_dashboard">Executive Overview</span>
+        </button>
+
+        <!-- Role Specific: Staff Operations Tab -->
+        <button onclick="switchTab('staffops')" id="nav-staffops" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <i data-lucide="headphones" class="w-3.5 h-3.5 text-accent"></i>
+          <span>Staff Operations Hub</span>
+          <span id="badgeStaffTickets" class="ml-auto px-1.5 py-0.5 text-[9px] font-bold rounded bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400">3 Tasks</span>
+        </button>
+
+        <!-- Role Specific: Customer Self-Service Portal Tab -->
+        <button onclick="switchTab('customerportal')" id="nav-customerportal" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <i data-lucide="user-check" class="w-3.5 h-3.5 text-brand"></i>
+          <span>Customer Self-Service</span>
+        </button>
+
+        <!-- Staff Accounts Management (Admin Only) -->
+        <button onclick="switchTab('staffmgmt')" id="nav-staffmgmt" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+          <span>Staff Accounts & Roles</span>
+        </button>
+
+        <button onclick="switchTab('subscriptions')" id="nav-subscriptions" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+          <span data-i18n="nav_subscriptions">Plans & Catalog</span>
+        </button>
+
+        <button onclick="switchTab('variants')" id="nav-variants" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <i data-lucide="package" class="w-3.5 h-3.5"></i>
+          <span>Products & Variants</span>
+        </button>
+
+        <button onclick="switchTab('customers')" id="nav-customers" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <i data-lucide="users" class="w-3.5 h-3.5"></i>
+          <span data-i18n="nav_customers">Customers Directory</span>
+          <span id="badgeTotalCustomers" class="ml-auto px-1.5 py-0.5 text-[9px] font-bold rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">8</span>
+        </button>
+
+        <button onclick="switchTab('billing')" id="nav-billing" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
+          <span data-i18n="nav_billing">Autonomous Billing</span>
+          <span id="badgePendingInvoices" class="ml-auto px-1.5 py-0.5 text-[9px] font-bold rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">2 Due</span>
+        </button>
+
+        <button onclick="switchTab('invoices')" id="nav-invoices" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+          <span data-i18n="nav_invoices">Invoices & Ledger</span>
+        </button>
+
+        <button onclick="switchTab('recovery')" id="nav-recovery" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
+          <span data-i18n="nav_recovery">Revenue Recovery</span>
+          <span class="ml-auto px-1.5 py-0.5 text-[9px] font-bold rounded bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900">Active</span>
+        </button>
+
+        <div class="px-2 pt-3 pb-1 text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500" data-i18n="section_ai">
+          AI & Digital Twin
+        </div>
+
+        <button onclick="switchTab('predictive')" id="nav-predictive" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <i data-lucide="brain-circuit" class="w-3.5 h-3.5"></i>
+          <span data-i18n="nav_predictive">Predictive ARR & Churn</span>
+        </button>
+
+        <button onclick="switchTab('digitaltwin')" id="nav-digitaltwin" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+          <span data-i18n="nav_digitaltwin">Digital Twin Simulator</span>
+        </button>
+
+        <button onclick="switchTab('decisions')" id="nav-decisions" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <i data-lucide="workflow" class="w-3.5 h-3.5"></i>
+          <span data-i18n="nav_decisions">AI Strategy Engine</span>
+          <span class="ml-auto w-1.5 h-1.5 rounded-full bg-accent"></span>
+        </button>
+
+        <button onclick="switchTab('tracking')" id="nav-tracking" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <i data-lucide="crosshair" class="w-3.5 h-3.5"></i>
+          <span>Predicted vs Actual</span>
+        </button>
+
+        <div class="px-2 pt-3 pb-1 text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500" data-i18n="section_analytics">
+          Analytics & Config
+        </div>
+
+        <button onclick="switchTab('analytics')" id="nav-analytics" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <i data-lucide="bar-chart-3" class="w-3.5 h-3.5"></i>
+          <span data-i18n="nav_analytics">SaaS Reports & Cohorts</span>
+        </button>
+
+        <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+          <span data-i18n="nav_settings">Rules & Tax Matrix</span>
+        </button>
+      </div>
+
+      <!-- Autonomous Agent Status Badge (Clickable with diagnostics) -->
+      <div class="p-3 border-t border-slate-200 dark:border-slate-800 shrink-0">
+        <div onclick="showToast('Autonomous Agent Sentry: 100% telemetry online. No anomalous drops detected.', 'success')" class="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 cursor-pointer hover:border-brand/40 transition">
+          <div class="flex items-center justify-between text-xs mb-1.5">
+            <span class="text-slate-500 dark:text-slate-400 text-[11px] flex items-center gap-1.5 font-medium">
+              <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span> Agent Sentry
+            </span>
+            <span class="text-accent text-[10px] font-bold uppercase">Online</span>
+          </div>
+          <div class="w-full bg-slate-200 dark:bg-slate-800 h-1 rounded-full overflow-hidden">
+            <div class="bg-accent h-full w-[94%]"></div>
+          </div>
+          <p id="autonomousSyncLabel" class="text-[10px] text-slate-500 dark:text-slate-400 mt-1.5">Database sync: 3s ago</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN VIEW AREA -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <!-- Contextual Action Bar with shifted Currency Switcher & Dynamic FX Rate Stepper -->
+      <div class="px-4 sm:px-6 py-2.5 border-b border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm flex flex-col md:flex-row md:items-center md:justify-between gap-2.5 shrink-0">
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <h1 id="pageTitle" class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">Executive Financial Command & Autonomous Intelligence</h1>
+          <span class="hidden lg:inline-flex px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">Fiscal Period: Q4 2026</span>
+          
+          <!-- Shifted Currency Toggle: $ USD <-> ₹ INR -->
+          <div class="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
+            <button onclick="setGlobalCurrency('USD')" id="curToggleUSD" class="px-2 py-1 rounded-md text-[11px] font-bold transition bg-brand text-white shadow-xs">
+              $ USD
+            </button>
+            <button onclick="setGlobalCurrency('INR')" id="curToggleINR" class="px-2 py-1 rounded-md text-[11px] font-bold transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+              ₹ INR
+            </button>
+          </div>
+
+          <!-- Dynamic FX Exchange Rate Controller with Increase/Decrease Steppers -->
+          <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg border border-slate-200 dark:border-slate-700 text-[10px] font-mono">
+            <button onclick="adjustFxRate(-0.5)" title="Decrease Dollar Rate by ₹0.50" class="w-4 h-4 flex items-center justify-center rounded bg-white dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 font-bold text-slate-700 dark:text-slate-200 transition shadow-2xs">
+              -
+            </button>
+            <button onclick="promptEditFxRate()" title="Click to manually set Dollar exchange rate" class="hover:text-brand font-bold text-slate-700 dark:text-slate-200 px-1 flex items-center gap-1">
+              <i data-lucide="refresh-cw" class="w-3 h-3 text-brand"></i>
+              <span id="fxRateDisplay">1$ = ₹83.50</span>
+            </button>
+            <button onclick="adjustFxRate(0.5)" title="Increase Dollar Rate by ₹0.50" class="w-4 h-4 flex items-center justify-center rounded bg-white dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 font-bold text-slate-700 dark:text-slate-200 transition shadow-2xs">
+              +
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <button onclick="openQuotationModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-semibold transition shadow-xs">
+            <i data-lucide="file-plus" class="w-3.5 h-3.5 text-brand"></i>
+            <span data-i18n="btn_quotation">+ New Quotation</span>
+          </button>
+
+          <button onclick="runAutonomousBilling()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-xs font-bold transition shadow-xs">
+            <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+            <span data-i18n="btn_billing">Run Billing</span>
+          </button>
+
+          <button onclick="toggleCopilot()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand hover:bg-brand-hover text-white text-xs font-bold transition shadow-xs">
+            <i data-lucide="bot" class="w-3.5 h-3.5"></i>
+            <span data-i18n="btn_copilot">AI Copilot</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- SCROLLABLE TAB WORKSPACE -->
+      <div class="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4 max-w-7xl w-full mx-auto">
+
+        <!-- ================= TAB 1: EXECUTIVE DASHBOARD (ALL 15 MANDATORY METRICS & ANALYTICS) ================= -->
+        <section id="view-dashboard" class="space-y-3.5">
+          <!-- Dynamic AI Dashboard Insights Banner (grounded in actual database state) -->
+          <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border-l-4 border-l-brand border-y border-r border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-xs">
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-lg bg-brand text-white flex items-center justify-center shrink-0">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold uppercase tracking-wider text-brand">AI Real-time Business Diagnosis</span>
+                  <span class="px-1.5 py-0.5 rounded text-[9px] bg-accent-light dark:bg-slate-800 text-accent font-bold">Live Data Engine</span>
+                </div>
+                <p id="aiDashboardInsightText" class="text-xs text-slate-700 dark:text-slate-200 mt-1 leading-relaxed font-medium">
+                  Loading autonomous analysis from platform database...
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <button onclick="switchTab('decisions')" class="px-3 py-1.5 rounded-lg bg-brand hover:bg-brand-hover text-white text-xs font-bold transition">
+                Take AI Actions
+              </button>
+              <button onclick="toggleCopilot('Give me a detailed breakdown of this month\'s MRR growth vs overdue risk.')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-semibold transition">
+                Ask Copilot
+              </button>
+            </div>
+          </div>
+
+          <!-- The Complete 15 Core Dashboard Metrics Grid -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+            <!-- 1. Total Customers -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">1. Total Customers</span>
+              <div id="m-totalCustomers" class="text-lg font-bold font-display text-slate-900 dark:text-white mt-0.5">8</div>
+              <span class="text-[9px] text-slate-400">All registered profiles</span>
+            </div>
+
+            <!-- 2. Active Subscriptions -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">2. Active Subscriptions</span>
+              <div id="m-activeSubs" class="text-lg font-bold font-display text-accent mt-0.5">5</div>
+              <span class="text-[9px] text-accent font-semibold">Generating recurring rev</span>
+            </div>
+
+            <!-- 3. New Subscriptions -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">3. New Subscriptions</span>
+              <div id="m-newSubs" class="text-lg font-bold font-display text-brand mt-0.5">+3</div>
+              <span class="text-[9px] text-brand font-semibold">Added in current cycle</span>
+            </div>
+
+            <!-- 4. Cancelled Subscriptions -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">4. Cancelled Subs</span>
+              <div id="m-cancelledSubs" class="text-lg font-bold font-display text-rose-500 mt-0.5">1</div>
+              <span class="text-[9px] text-rose-500 font-semibold">Terminated accounts</span>
+            </div>
+
+            <!-- 5. Paused Subscriptions -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">5. Paused Subs</span>
+              <div id="m-pausedSubs" class="text-lg font-bold font-display text-amber-500 mt-0.5">1</div>
+              <span class="text-[9px] text-amber-500 font-semibold">Billing temporarily halted</span>
+            </div>
+
+            <!-- 6. Monthly Rec. Revenue (MRR) -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">6. Monthly Revenue (MRR)</span>
+              <div id="m-mrr" class="text-lg font-bold font-display text-slate-900 dark:text-white mt-0.5">$84,250</div>
+              <span class="text-[9px] text-accent font-semibold">+14.0% vs last month</span>
+            </div>
+
+            <!-- 7. Annual Rec. Revenue (ARR) -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">7. Annual Run-Rate (ARR)</span>
+              <div id="m-arr" class="text-lg font-bold font-display text-brand mt-0.5">$1.011M</div>
+              <span class="text-[9px] text-slate-400 font-mono">Paced for target</span>
+            </div>
+
+            <!-- 8. Total Collected Revenue -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">8. Collected Revenue</span>
+              <div id="m-collectedRev" class="text-lg font-bold font-display text-accent mt-0.5">$102,490</div>
+              <span class="text-[9px] text-accent font-semibold">Reconciled in bank</span>
+            </div>
+
+            <!-- 9. Outstanding Invoices -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">9. Outstanding Invoices</span>
+              <div id="m-outstandingInv" class="text-lg font-bold font-display text-amber-500 mt-0.5">1 Due</div>
+              <span id="m-outstandingVal" class="text-[9px] text-slate-400 font-mono">$1,566.00 queued</span>
+            </div>
+
+            <!-- 10. Overdue Invoices -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">10. Overdue Invoices</span>
+              <div id="m-overdueInv" class="text-lg font-bold font-display text-rose-500 mt-0.5">2 Overdue</div>
+              <span id="m-overdueVal" class="text-[9px] text-rose-500 font-mono font-semibold">$1,077.84 at risk</span>
+            </div>
+
+            <!-- 11. Failed Payments -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">11. Failed Payments</span>
+              <div id="m-failedPayments" class="text-lg font-bold font-display text-rose-600 mt-0.5">2 Cases</div>
+              <span class="text-[9px] text-rose-500">In Dunning Sentry</span>
+            </div>
+
+            <!-- 12. Customer Churn Rate -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">12. Churn Rate</span>
+              <div id="m-churnRate" class="text-lg font-bold font-display text-rose-500 mt-0.5">1.82%</div>
+              <span class="text-[9px] text-accent font-semibold">-0.4% improvement</span>
+            </div>
+
+            <!-- 13. Customer Retention Rate -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">13. Retention Rate</span>
+              <div id="m-retentionRate" class="text-lg font-bold font-display text-accent mt-0.5">98.18%</div>
+              <span class="text-[9px] text-accent font-semibold">Top quartile SaaS</span>
+            </div>
+
+            <!-- 14. Avg Customer LTV -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">14. Avg Customer LTV</span>
+              <div id="m-ltv" class="text-lg font-bold font-display text-slate-900 dark:text-white mt-0.5">$8,940</div>
+              <span class="text-[9px] text-brand font-semibold">LTV:CAC = 4.8x</span>
+            </div>
+
+            <!-- 15. Upcoming Renewals -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">15. Upcoming Renewals</span>
+              <div id="m-upcomingRenewals" class="text-lg font-bold font-display text-brand mt-0.5">3 Renewals</div>
+              <span class="text-[9px] text-brand font-semibold">Next 30 days</span>
+            </div>
+          </div>
+
+          <!-- Dashboard Analytics Visualizations (Step 4 Analytics Requirements) -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            <!-- Analytics Chart 1: Monthly Revenue & Growth -->
+            <div class="lg:col-span-2 p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div class="flex items-center justify-between mb-2">
+                <div>
+                  <h3 class="text-xs font-bold text-slate-900 dark:text-white">Monthly Revenue Trends & Customer Acquisition</h3>
+                  <p class="text-[10px] text-slate-500 dark:text-slate-400">Actual recurring cashflow vs. cohort additions</p>
+                </div>
+                <div class="flex items-center gap-3 text-[11px]">
+                  <span class="flex items-center gap-1.5 text-brand font-medium"><span class="w-3 h-1 bg-brand rounded"></span> Revenue</span>
+                  <span class="flex items-center gap-1.5 text-accent font-medium"><span class="w-3 h-1 bg-accent rounded"></span> Projected</span>
+                </div>
+              </div>
+              <div class="h-56">
+                <canvas id="overviewRevenueChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Analytics Chart 2: Product & Plan-wise Revenue Breakdown -->
+            <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <h3 class="text-xs font-bold text-slate-900 dark:text-white">Plan-Wise Revenue Share</h3>
+                  <span class="text-[10px] text-slate-400">By MRR Contribution</span>
+                </div>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400 mb-2">Starter vs. Pro vs. Enterprise Twin</p>
+                <div class="h-36 relative">
+                  <canvas id="overviewPlanPieChart"></canvas>
+                </div>
+              </div>
+              <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200 dark:border-slate-800 text-center text-xs">
+                <div>
+                  <p class="text-[10px] text-slate-400">Starter</p>
+                  <p id="shareStarter" class="font-bold text-slate-700 dark:text-slate-300">14%</p>
+                </div>
+                <div>
+                  <p class="text-[10px] text-slate-400">Pro</p>
+                  <p id="sharePro" class="font-bold text-brand">35%</p>
+                </div>
+                <div>
+                  <p class="text-[10px] text-slate-400">Enterprise</p>
+                  <p id="shareEnterprise" class="font-bold text-accent">51%</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Secondary Analytics Row: Monthly vs Yearly Subscriptions & Payment Health -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-xs font-bold text-slate-900 dark:text-white">Cadence Split (Monthly vs. Annual)</span>
+              <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Annual commitments stabilize net cashflow runway</p>
+              <div class="mt-3 space-y-2 text-xs">
+                <div>
+                  <div class="flex justify-between text-[11px] font-semibold mb-1">
+                    <span>Monthly Billing Cadence</span>
+                    <span class="font-mono text-slate-700 dark:text-slate-300">62% (5 Accounts)</span>
+                  </div>
+                  <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                    <div class="bg-brand h-full w-[62%]"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-[11px] font-semibold mb-1">
+                    <span>Annual Billing Cadence (15% Rebate)</span>
+                    <span class="font-mono text-accent">38% (3 Accounts)</span>
+                  </div>
+                  <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                    <div class="bg-accent h-full w-[38%]"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span class="text-xs font-bold text-slate-900 dark:text-white">Payment Success vs. Failure Rate</span>
+              <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Gateway settlement health for October cycle</p>
+              <div class="mt-3 space-y-2 text-xs">
+                <div>
+                  <div class="flex justify-between text-[11px] font-semibold mb-1">
+                    <span class="text-accent font-bold">Successful Settlements</span>
+                    <span class="font-mono text-accent">85.7% (6 Cleared)</span>
+                  </div>
+                  <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                    <div class="bg-accent h-full w-[85.7%]"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-[11px] font-semibold mb-1">
+                    <span class="text-rose-500 font-bold">Delinquencies / Failures</span>
+                    <span class="font-mono text-rose-500">14.3% (2 Invoices)</span>
+                  </div>
+                  <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                    <div class="bg-rose-500 h-full w-[14.3%]"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+              <div>
+                <span class="text-xs font-bold text-slate-900 dark:text-white">Customer Retention Trend</span>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">3-Month trailing cohort retention</p>
+                <div class="mt-2 text-2xl font-bold font-display text-accent">98.18%</div>
+                <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-1 leading-tight">
+                  Autonomous churn intervention prevented 2 account cancellations in past 45 days.
+                </p>
+              </div>
+              <button onclick="switchTab('analytics')" class="mt-2 text-[11px] text-brand font-bold hover:underline flex items-center gap-1">
+                View Full Cohort Reports <i data-lucide="arrow-right" class="w-3 h-3"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Activity Stream -->
+          <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xs font-bold text-slate-900 dark:text-white" data-i18n="activity_title">Platform Activity Stream</h3>
+              <button onclick="refreshData()" class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs flex items-center gap-1 transition">
+                <i data-lucide="rotate-cw" class="w-3 h-3"></i>
+                <span>Sync</span>
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 pb-1.5">
+                    <th class="py-2 font-semibold">Account</th>
+                    <th class="py-2 font-semibold">Event</th>
+                    <th class="py-2 font-semibold">Plan</th>
+                    <th class="py-2 font-semibold">Value</th>
+                    <th class="py-2 font-semibold">Status</th>
+                    <th class="py-2 font-semibold text-right">Time</th>
+                  </tr>
+                </thead>
+                <tbody id="activityFeedBody" class="divide-y divide-slate-100 dark:divide-slate-800">
+                  <!-- Injected via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: STAFF OPERATIONS PORTAL (3.2 STAFF ROLE) ================= -->
+        <section id="view-staffops" class="space-y-4 hidden">
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border-l-4 border-l-accent border-y border-r border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-xs">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-accent-light dark:bg-slate-800 text-accent">Staff Operations Hub (Role: Staff)</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400">Assigned Portfolios & Support Queues</span>
+              </div>
+              <h2 class="text-sm font-bold text-slate-900 dark:text-white">Daily Operational Workflows & Follow-up Actions</h2>
+              <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                Staff handles customer registrations, quotation authoring, authorized manual payment logging, overdue reminders, and ticket escalations.
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="openQuotationModal()" class="px-3 py-1.5 rounded-lg bg-brand hover:bg-brand-hover text-white text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+                <i data-lucide="file-plus" class="w-3.5 h-3.5"></i>
+                <span>+ Create Quotation</span>
+              </button>
+              <button onclick="promptLogAuthorizedPayment()" class="px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                <span>Record Payment</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <!-- Staff Item 1: Assigned Portfolio & Follow-ups -->
+            <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-xs font-bold text-slate-900 dark:text-white">Assigned Customers & Overdue Invoices</h3>
+                <span class="text-[10px] text-slate-400">Operator: Alex Drake (Staff)</span>
+              </div>
+              <div class="space-y-2.5">
+                <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                  <div>
+                    <div class="font-bold text-slate-900 dark:text-white text-xs">Vortex Global (Pro Tier)</div>
+                    <div class="text-[10px] text-rose-500 font-semibold font-mono">INV-2026-0893: $538.92 Overdue (3 days)</div>
+                    <p class="text-[10px] text-slate-500 mt-0.5">AI Suggestion: Send friendly payroll sync follow-up</p>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <button onclick="staffSendFollowup('Vortex Global')" class="px-2.5 py-1 rounded bg-brand text-white text-[10px] font-bold">Follow Up</button>
+                    <button onclick="escalateToAdmin('Vortex Global Delinquency')" class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-800 text-rose-600 dark:text-rose-400 text-[10px] font-semibold">Escalate</button>
+                  </div>
+                </div>
+
+                <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                  <div>
+                    <div class="font-bold text-slate-900 dark:text-white text-xs">BluePeak Systems (Pro Tier)</div>
+                    <div class="text-[10px] text-rose-500 font-semibold font-mono">INV-2026-0894: $538.92 Expired Card</div>
+                    <p class="text-[10px] text-slate-500 mt-0.5">AI Suggestion: Request billing admin update card expiry date</p>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <button onclick="staffSendFollowup('BluePeak Systems')" class="px-2.5 py-1 rounded bg-brand text-white text-[10px] font-bold">Follow Up</button>
+                    <button onclick="escalateToAdmin('BluePeak Card Decline')" class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-800 text-rose-600 dark:text-rose-400 text-[10px] font-semibold">Escalate</button>
+                  </div>
+                </div>
+
+                <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                  <div>
+                    <div class="font-bold text-slate-900 dark:text-white text-xs">Apex Dynamics (Enterprise Twin)</div>
+                    <div class="text-[10px] text-amber-500 font-semibold font-mono">INV-2026-0895: $1,566.00 Due in 4 days</div>
+                    <p class="text-[10px] text-slate-500 mt-0.5">AI Suggestion: Confirm PO authorization prior to auto-debit</p>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <button onclick="staffSendFollowup('Apex Dynamics')" class="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-[10px] font-bold">Send Reminder</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Staff Item 2: Support Ticket Queue & Service Desk -->
+            <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <h3 class="text-xs font-bold text-slate-900 dark:text-white">Customer Support Requests & Inquiries</h3>
+                  <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-accent-light dark:bg-slate-800 text-accent">Active Queue</span>
+                </div>
+                <div class="space-y-2.5" id="staffTicketsList">
+                  <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center justify-between text-xs">
+                      <span class="font-bold text-slate-900 dark:text-white">TICK-401: Request invoice address amendment</span>
+                      <span class="px-1.5 py-0.5 rounded text-[9px] bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400 font-bold">Pending</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">From: HyperFlow Media (finance@hyperflow.io)</p>
+                    <div class="flex justify-end gap-2 mt-2">
+                      <button onclick="resolveStaffTicket('TICK-401')" class="px-2.5 py-1 rounded bg-accent text-white text-[10px] font-bold">Mark Resolved</button>
+                    </div>
+                  </div>
+
+                  <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center justify-between text-xs">
+                      <span class="font-bold text-slate-900 dark:text-white">TICK-402: Inquiry on SOC2 compliance add-on pricing</span>
+                      <span class="px-1.5 py-0.5 rounded text-[9px] bg-brand-light dark:bg-slate-800 text-brand font-bold">Quotation Request</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">From: Stratum Analytics (revops@stratumanalytics.co)</p>
+                    <div class="flex justify-end gap-2 mt-2">
+                      <button onclick="openQuotationModal()" class="px-2.5 py-1 rounded bg-brand text-white text-[10px] font-bold">Generate Quote</button>
+                      <button onclick="resolveStaffTicket('TICK-402')" class="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[10px]">Close</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="pt-3 mt-3 border-t border-slate-200 dark:border-slate-800 flex justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                <span>Staff Permission Level: Operations (No Admin Settings Edit)</span>
+                <span class="text-accent font-semibold">Audit Active</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: CUSTOMER SELF-SERVICE PORTAL (3.3 CUSTOMER ROLE) ================= -->
+        <section id="view-customerportal" class="space-y-4 hidden">
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border-l-4 border-l-brand border-y border-r border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-xs">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-light dark:bg-slate-800 text-brand">Customer Self-Service Portal</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400">Authenticated as: Nexus Synthetics</span>
+              </div>
+              <h2 class="text-sm font-bold text-slate-900 dark:text-white">Manage Your Active Subscription & Billing</h2>
+              <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                Browse tier offerings, upgrade, request temporary pause, download receipts, or raise tickets to your account manager.
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="promptRaiseSupportTicket()" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-semibold">
+                Raise Support Ticket
+              </button>
+              <button onclick="promptCustomerPayment()" class="px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-xs font-bold shadow-xs">
+                Make Payment
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- Active Customer Plan Card -->
+            <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-accent-light dark:bg-slate-800 text-accent">Current Active Plan</span>
+                  <span class="text-xs text-slate-400 font-mono">CUST-101</span>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Enterprise Twin Cloud</h3>
+                <div class="my-3">
+                  <span id="custPortalPlanPrice" class="text-2xl font-extrabold font-display text-brand">$1,450</span>
+                  <span class="text-xs text-slate-500">/ month (Annual Cadence)</span>
+                </div>
+                <ul class="space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
+                  <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-accent"></i> Dedicated VPC Tenant Active</li>
+                  <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-accent"></i> 24/7 Priority SLA SLA guarantee</li>
+                  <li class="flex items-center gap-1.5"><i data-lucide="calendar" class="w-3.5 h-3.5 text-brand"></i> Next Renewal Date: Nov 14, 2026</li>
+                </ul>
+              </div>
+              <div class="pt-3 mt-4 border-t border-slate-200 dark:border-slate-800 flex gap-2">
+                <button onclick="changeCustomerPlan('CUST-101', 'Pro')" class="flex-1 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold">
+                  Downgrade Plan
+                </button>
+                <button onclick="toggleCustomerPause('CUST-101')" class="flex-1 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold">
+                  Pause Plan
+                </button>
+                <button onclick="showToast('Cancellation request submitted to your dedicated account manager.', 'info')" class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-600 text-xs font-semibold">
+                  Cancel
+                </button>
+              </div>
+            </div>
+
+            <!-- Customer Invoices and Receipts -->
+            <div class="lg:col-span-2 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-xs font-bold text-slate-900 dark:text-white">Your Invoices & Payment Receipts</h3>
+                <span class="text-[10px] text-slate-400">Tax Compliant GST/VAT Records</span>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                  <thead>
+                    <tr class="text-slate-400 border-b border-slate-200 dark:border-slate-800 pb-2">
+                      <th class="py-2">Invoice #</th>
+                      <th class="py-2">Description</th>
+                      <th class="py-2">Total Amount</th>
+                      <th class="py-2">Issued Date</th>
+                      <th class="py-2">Status</th>
+                      <th class="py-2 text-right">Receipt</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    <tr>
+                      <td class="py-2.5 font-mono font-bold text-brand">INV-2026-0891</td>
+                      <td class="py-2.5 text-slate-800 dark:text-slate-200">Enterprise Twin (Monthly + Tax)</td>
+                      <td class="py-2.5 font-mono font-bold text-slate-900 dark:text-white">$1,566.00</td>
+                      <td class="py-2.5 text-slate-400">Oct 14, 2026</td>
+                      <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-accent-light dark:bg-slate-800 text-accent">Paid</span></td>
+                      <td class="py-2.5 text-right"><button onclick="showToast('Downloaded official receipt PDF for INV-2026-0891', 'success')" class="text-brand font-semibold hover:underline">Download PDF</button></td>
+                    </tr>
+                    <tr>
+                      <td class="py-2.5 font-mono font-bold text-brand">INV-2026-0740</td>
+                      <td class="py-2.5 text-slate-800 dark:text-slate-200">Enterprise Twin (Monthly + Tax)</td>
+                      <td class="py-2.5 font-mono font-bold text-slate-900 dark:text-white">$1,566.00</td>
+                      <td class="py-2.5 text-slate-400">Sep 14, 2026</td>
+                      <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-accent-light dark:bg-slate-800 text-accent">Paid</span></td>
+                      <td class="py-2.5 text-right"><button onclick="showToast('Downloaded official receipt PDF for INV-2026-0740', 'success')" class="text-brand font-semibold hover:underline">Download PDF</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: STAFF ACCOUNTS & ROLES MANAGEMENT (3.1 ADMIN ROLE) ================= -->
+        <section id="view-staffmgmt" class="space-y-4 hidden">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-light dark:bg-slate-800 text-brand">Pillar 1 / Admin Governance</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400">Role-Based Access Control (RBAC)</span>
+              </div>
+              <h2 class="text-sm font-bold text-slate-900 dark:text-white mt-1">Staff Accounts, Roles & Permissions</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Manage internal team members, assign operational scope, and audit access permissions.</p>
+            </div>
+            <button onclick="promptCreateStaffAccount()" class="px-3 py-1.5 rounded-lg bg-brand hover:bg-brand-hover text-white text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+              <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+              <span>+ Create Staff Account</span>
+            </button>
+          </div>
+
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="text-slate-400 border-b border-slate-200 dark:border-slate-800 pb-2">
+                    <th class="py-2">Staff Member</th>
+                    <th class="py-2">Email</th>
+                    <th class="py-2">Assigned Role</th>
+                    <th class="py-2">Permissions Scope</th>
+                    <th class="py-2">Status</th>
+                    <th class="py-2 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="staffAccountsTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
+                  <!-- Injected via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 2: PLANS & CATALOG ================= -->
+        <section id="view-subscriptions" class="space-y-4 hidden">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900 dark:text-white" data-i18n="cat_title">Product Catalog & Subscription Tiers</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Dual-currency pricing matrix with active tier constraints.</p>
+            </div>
+            <button onclick="openQuotationModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand hover:bg-brand-hover text-white font-bold text-xs shadow-xs transition">
+              <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+              <span>+ Create Customer Quotation</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <!-- Tier 1 -->
+            <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="flex justify-between items-start mb-1.5">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Self-Serve</span>
+                  <span id="starterSubCount" class="text-xs text-accent font-semibold">84 Subscribers</span>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Starter Cloud</h3>
+                <div class="mt-3 mb-3">
+                  <span id="starterPriceDisplay" class="text-2xl font-extrabold text-slate-900 dark:text-white font-display">$149</span>
+                  <span class="text-xs text-slate-500 dark:text-slate-400">/ month</span>
+                </div>
+                <ul class="space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
+                  <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-accent"></i> 2,000 active customer records</li>
+                  <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-accent"></i> Automated invoice dispatch</li>
+                </ul>
+              </div>
+              <div class="pt-3 mt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <span id="starterArrDisplay" class="text-xs text-slate-500 dark:text-slate-400">ARR: $150.2k</span>
+                <button onclick="promptEditPlan('Starter')" class="text-xs text-brand font-bold hover:underline flex items-center gap-1">
+                  <i data-lucide="edit-3" class="w-3 h-3"></i> Edit
+                </button>
+              </div>
+            </div>
+
+            <!-- Tier 2 -->
+            <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border-2 border-brand shadow-xs flex flex-col justify-between relative">
+              <div class="absolute -top-2.5 right-4 px-2 py-0.5 bg-brand text-white text-[9px] font-extrabold rounded-full uppercase tracking-wider">
+                Popular
+              </div>
+              <div>
+                <div class="flex justify-between items-start mb-1.5">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-light dark:bg-slate-800 text-brand">Growth Tier</span>
+                  <span id="proSubCount" class="text-xs text-accent font-semibold">71 Subscribers</span>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Professional Pro</h3>
+                <div class="mt-3 mb-3">
+                  <span id="proPriceDisplay" class="text-2xl font-extrabold text-brand font-display">$499</span>
+                  <span class="text-xs text-slate-500 dark:text-slate-400">/ month</span>
+                </div>
+                <ul class="space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
+                  <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-brand"></i> Autonomous Revenue Recovery</li>
+                  <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-brand"></i> Churn & Anomaly Surveillance</li>
+                </ul>
+              </div>
+              <div class="pt-3 mt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <span id="proArrDisplay" class="text-xs text-slate-500 dark:text-slate-400">ARR: $425.1k</span>
+                <button onclick="promptEditPlan('Pro')" class="text-xs text-brand font-bold hover:underline flex items-center gap-1">
+                  <i data-lucide="edit-3" class="w-3 h-3"></i> Edit
+                </button>
+              </div>
+            </div>
+
+            <!-- Tier 3 -->
+            <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="flex justify-between items-start mb-1.5">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-accent-light dark:bg-slate-800 text-accent">Strategic</span>
+                  <span id="enterpriseSubCount" class="text-xs text-accent font-semibold">31 Subscribers</span>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Enterprise Twin</h3>
+                <div class="mt-3 mb-3">
+                  <span id="enterprisePriceDisplay" class="text-2xl font-extrabold text-slate-900 dark:text-white font-display">$1,450</span>
+                  <span class="text-xs text-slate-500 dark:text-slate-400">/ month</span>
+                </div>
+                <ul class="space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
+                  <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-accent"></i> Monte Carlo What-If Sandbox</li>
+                  <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-accent"></i> Custom ERP & Ledger Sync</li>
+                </ul>
+              </div>
+              <div class="pt-3 mt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <span id="enterpriseArrDisplay" class="text-xs text-slate-500 dark:text-slate-400">ARR: $539.4k</span>
+                <button onclick="promptEditPlan('Enterprise')" class="text-xs text-brand font-bold hover:underline flex items-center gap-1">
+                  <i data-lucide="edit-3" class="w-3 h-3"></i> Edit
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: PRODUCTS & VARIANTS MANAGEMENT ================= -->
+        <section id="view-variants" class="space-y-4 hidden">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-light dark:bg-slate-800 text-brand">Pillar 1: Product Architecture</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400">SKUs & Modular Add-ons</span>
+              </div>
+              <h2 class="text-sm font-bold text-slate-900 dark:text-white mt-1">Product Catalog & Variant Management</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Configure base products, usage tiers, and modular revenue add-ons.</p>
+            </div>
+            <button onclick="promptCreateVariant()" class="px-3 py-1.5 rounded-lg bg-brand hover:bg-brand-hover text-white text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>+ Create Variant Add-on</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3" id="variantsGridContainer">
+            <!-- Populated via JS -->
+          </div>
+        </section>
+
+        <!-- ================= TAB: CUSTOMERS DIRECTORY ================= -->
+        <section id="view-customers" class="space-y-4 hidden">
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
+              <div>
+                <h3 class="text-xs font-bold text-slate-900 dark:text-white">Active Subscriber Lifecycle Management</h3>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">Upgrade, Downgrade, Pause, Cancel, or Renew subscriptions in real-time</p>
+              </div>
+              <div class="flex items-center gap-2 w-full sm:w-auto">
+                <input id="customerSearchInput" oninput="filterCustomerTable()" type="text" placeholder="Search customer or email..." class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-800 dark:text-slate-200 focus:outline-none">
+                <select id="planFilterSelect" onchange="filterCustomerTable()" class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-800 dark:text-slate-200 focus:outline-none">
+                  <option value="ALL">All Plans</option>
+                  <option value="Starter">Starter</option>
+                  <option value="Pro">Pro</option>
+                  <option value="Enterprise">Enterprise</option>
+                </select>
+                <button onclick="openQuotationModal()" class="px-2.5 py-1 rounded-lg bg-brand hover:bg-brand-hover text-white text-xs font-bold flex items-center gap-1 shrink-0">
+                  <i data-lucide="plus" class="w-3 h-3"></i> Add
+                </button>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 pb-1.5">
+                    <th class="py-2 font-semibold">Customer / Account</th>
+                    <th class="py-2 font-semibold">Tier</th>
+                    <th class="py-2 font-semibold">Status</th>
+                    <th class="py-2 font-semibold">Health Score</th>
+                    <th class="py-2 font-semibold">MRR</th>
+                    <th class="py-2 font-semibold">Next Invoice</th>
+                    <th class="py-2 font-semibold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="customerTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
+                  <!-- Dynamically Rendered -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: AUTONOMOUS BILLING ================= -->
+        <section id="view-billing" class="space-y-4 hidden">
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border-l-4 border-l-accent border-y border-r border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-xs">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-accent-light dark:bg-slate-800 text-accent">Pillar 2: Autonomous Billing Engine</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400">Scheduled: Daily UTC</span>
+              </div>
+              <h2 class="text-sm font-bold text-slate-900 dark:text-white">Recurring Invoicing & Automated Tax Reconciliation</h2>
+              <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                Automated scheduler processes renewals, applies multi-jurisdiction taxes (GST/VAT) & volume discounts.
+              </p>
+            </div>
+            <button onclick="runAutonomousBilling()" class="px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-xs font-bold transition flex items-center gap-1.5 shrink-0">
+              <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+              <span>Trigger Recurring Run</span>
+            </button>
+          </div>
+
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-xs font-bold text-slate-900 dark:text-white">Live Cycle Invoices</h3>
+              <button onclick="simulateInvoiceCreation()" class="text-xs px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200">
+                + Simulate Invoice
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 pb-1.5">
+                    <th class="py-2 font-semibold">Invoice ID</th>
+                    <th class="py-2 font-semibold">Customer</th>
+                    <th class="py-2 font-semibold">Plan Item</th>
+                    <th class="py-2 font-semibold">Subtotal</th>
+                    <th class="py-2 font-semibold">Tax</th>
+                    <th class="py-2 font-semibold">Total</th>
+                    <th class="py-2 font-semibold">Status</th>
+                    <th class="py-2 font-semibold text-right">Reconcile</th>
+                  </tr>
+                </thead>
+                <tbody id="invoiceTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
+          <!-- Dynamically Injected -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+        <!-- ================= TAB: INVOICES & LEDGER ================= -->
+        <section id="view-invoices" class="space-y-4 hidden">
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
+              <div>
+                <h3 class="text-xs font-bold text-slate-900 dark:text-white">Invoice Repository & Payment General Ledger</h3>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">Search and audit tax-compliant receipts and transaction IDs</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <select id="invoiceFilterSelect" onchange="renderInvoiceLedgerTable()" class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-800 dark:text-slate-200 focus:outline-none">
+                  <option value="ALL">All Statuses</option>
+                  <option value="Paid">Paid</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Failed">Failed</option>
+                </select>
+                <button onclick="simulateInvoiceCreation()" class="text-xs px-2.5 py-1 rounded-lg bg-brand hover:bg-brand-hover text-white font-bold flex items-center gap-1">
+                  <i data-lucide="file-plus" class="w-3 h-3"></i> Generate
+                </button>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 pb-1.5">
+                    <th class="py-2 font-semibold">Invoice ID</th>
+                    <th class="py-2 font-semibold">Customer</th>
+                    <th class="py-2 font-semibold">Plan Item</th>
+                    <th class="py-2 font-semibold">Subtotal</th>
+                    <th class="py-2 font-semibold">Tax</th>
+                    <th class="py-2 font-semibold">Total</th>
+                    <th class="py-2 font-semibold">Status</th>
+                    <th class="py-2 font-semibold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="invoiceLedgerTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
+                  <!-- Injected via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: REVENUE RECOVERY AGENT ================= -->
+        <section id="view-recovery" class="space-y-4 hidden">
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border-l-4 border-l-rose-500 border-y border-r border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-xs">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400">Pillar 3: Autonomous Revenue Recovery</span>
+                <span class="text-xs text-accent font-semibold flex items-center gap-1">
+                  <span class="w-2 h-2 rounded-full bg-accent"></span> Protecting MRR
+                </span>
+              </div>
+              <h2 class="text-sm font-bold text-slate-900 dark:text-white">Smart Dunning & Payment Leakage Sentry</h2>
+              <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                Diagnoses failure codes (insufficient funds, expired card), computes optimal banking retries, and triggers SMS paylinks.
+              </p>
+            </div>
+            <button onclick="executeAllRecoveryWorkflows()" class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition flex items-center gap-1.5 shrink-0">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+              <span>Execute All Workflows</span>
+            </button>
+          </div>
+
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-xs font-bold text-slate-900 dark:text-white">Delinquent Invoices & Recovery Queue</h3>
+              <span class="text-[10px] text-slate-400">Auto-Cadence: +4h, +24h, +72h, +5d</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 pb-1.5">
+                    <th class="py-2 font-semibold">Account / ID</th>
+                    <th class="py-2 font-semibold">Amount</th>
+                    <th class="py-2 font-semibold">Code</th>
+                    <th class="py-2 font-semibold">AI Diagnostic Cause</th>
+                    <th class="py-2 font-semibold">Action Plan</th>
+                    <th class="py-2 font-semibold text-right">Autonomous Trigger</th>
+                  </tr>
+                </thead>
+                <tbody id="recoveryTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
+                  <!-- Injected via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: PREDICTIVE AI & CHURN ================= -->
+        <section id="view-predictive" class="space-y-4 hidden">
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="text-xs font-bold text-slate-900 dark:text-white">12-Month Predictive ARR Forecast Corridor</h3>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400">Probabilistic ARR Corridor (P10 Pessimistic, P50 Target, P90 Optimistic)</p>
+              </div>
+              <div class="flex items-center gap-3 text-xs font-mono">
+                <span class="text-accent font-semibold">P90: $1.42M</span>
+                <span class="text-brand font-semibold">P50: $1.21M</span>
+                <span class="text-rose-500 font-semibold">P10: $980k</span>
+              </div>
+            </div>
+            <div class="h-56">
+              <canvas id="predictiveForecastChart"></canvas>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <!-- Churn Propensity Radar -->
+            <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xs font-bold text-slate-900 dark:text-white">Explainable Churn Risk Radar</h3>
+                <span class="text-[9px] px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 font-bold">Top Risk Accounts</span>
+              </div>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-3">Multi-dimensional scoring: usage telemetry, payment health, and ticket sentiment.</p>
+              <div class="space-y-2.5" id="churnRiskList">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+
+            <!-- Financial Anomaly Surveillance -->
+            <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <h3 class="text-xs font-bold text-slate-900 dark:text-white">Financial Anomaly Surveillance</h3>
+                  <span class="text-[9px] px-2 py-0.5 rounded bg-brand-light dark:bg-slate-800 text-brand font-bold">Autonomous Sentry</span>
+                </div>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-3">Surveillance identifying coupon exploitation, fraud spikes, and abnormal chargebacks.</p>
+                <div class="space-y-3">
+                  <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-bold text-slate-800 dark:text-slate-200">Abnormal Discount Code Velocity</span>
+                      <span class="text-[10px] font-mono text-brand">CODE: 'GROWTH50'</span>
+                    </div>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">4 enterprise accounts used single-use executive discount coupon within 90 minutes from identical subnet.</p>
+                    <button onclick="showToast('Coupon domain restrictions applied.', 'success')" class="text-xs font-semibold text-brand hover:underline mt-2 block">Restrict Coupon Domain</button>
+                  </div>
+
+                  <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-bold text-slate-800 dark:text-slate-200">Chargeback Frequency Spike</span>
+                      <span class="text-[10px] font-mono text-rose-600 dark:text-rose-400">0.68% Threshold</span>
+                    </div>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">Starter tier declines surged +14% after recent cardholder bank 3D-Secure protocol update.</p>
+                    <button onclick="showToast('Autonomous 3D-Secure prompt activated.', 'success')" class="text-xs font-semibold text-brand hover:underline mt-2 block">Activate 3DS Auto-Prompt</button>
+                  </div>
+
+                  <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-bold text-slate-800 dark:text-slate-200">Payment Failure Propensity Alert</span>
+                      <span class="text-[10px] font-mono text-accent">LTV Impact: High</span>
+                    </div>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">Pre-billing risk model detected 2 corporate debit cards nearing credit expiration prior to next cycle.</p>
+                    <button onclick="showToast('Preemptive card update notices dispatched.', 'success')" class="text-xs font-semibold text-brand hover:underline mt-2 block">Preempt Card Expiration</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: DIGITAL TWIN SIMULATOR ================= -->
+        <section id="view-digitaltwin" class="space-y-4 hidden">
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-light dark:bg-slate-800 text-brand">Pillar 4: Digital Twin & What-If Simulation</span>
+                  <span class="text-xs text-slate-500 dark:text-slate-400">Monte Carlo 500+ Iterations</span>
+                </div>
+                <h3 class="text-sm font-bold text-slate-900 dark:text-white mt-1">Business Simulation Lab on Live Production Data</h3>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">Simulate pricing elasticity, customer acquisition growth, churn shocks, discount volume, and payment failures.</p>
+              </div>
+              <button onclick="resetSimulationSliders()" class="px-2.5 py-1 text-xs rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
+                Reset Levers
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div class="space-y-3">
+                <!-- Lever 1: Pricing -->
+                <div>
+                  <div class="flex justify-between text-xs font-semibold mb-1">
+                    <span>1. Plan Price Adjustment</span>
+                    <span id="labelPriceChange" class="text-brand font-bold">+10%</span>
+                  </div>
+                  <input id="sliderPriceChange" oninput="runDigitalTwinSimulation()" type="range" min="-30" max="50" value="10" step="1" class="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brand">
+                </div>
+
+                <!-- Lever 2: Churn -->
+                <div>
+                  <div class="flex justify-between text-xs font-semibold mb-1">
+                    <span>2. Target Churn Rate</span>
+                    <span id="labelChurnRate" class="text-accent font-bold">1.5%</span>
+                  </div>
+                  <input id="sliderChurnRate" oninput="runDigitalTwinSimulation()" type="range" min="0.5" max="8.0" value="1.5" step="0.1" class="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-accent">
+                </div>
+
+                <!-- Lever 3: Customer Growth -->
+                <div>
+                  <div class="flex justify-between text-xs font-semibold mb-1">
+                    <span>3. Customer Acquisition Ramp</span>
+                    <span id="labelAcquisition" class="text-brand font-bold">+15%</span>
+                  </div>
+                  <input id="sliderAcquisition" oninput="runDigitalTwinSimulation()" type="range" min="-20" max="60" value="15" step="1" class="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brand">
+                </div>
+
+                <!-- Lever 4: Discount Volume -->
+                <div>
+                  <div class="flex justify-between text-xs font-semibold mb-1">
+                    <span>4. Discount Penetration</span>
+                    <span id="labelDiscountVol" class="text-indigo-500 font-bold">5%</span>
+                  </div>
+                  <input id="sliderDiscountVol" oninput="runDigitalTwinSimulation()" type="range" min="0" max="25" value="5" step="1" class="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                </div>
+
+                <!-- Lever 5: Payment Failures -->
+                <div>
+                  <div class="flex justify-between text-xs font-semibold mb-1">
+                    <span>5. Payment Failure Rate</span>
+                    <span id="labelPaymentFail" class="text-rose-500 font-bold">3.2%</span>
+                  </div>
+                  <input id="sliderPaymentFail" oninput="runDigitalTwinSimulation()" type="range" min="0.5" max="12.0" value="3.2" step="0.1" class="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500">
+                </div>
+
+                <!-- Presets -->
+                <div class="pt-2 border-t border-slate-200 dark:border-slate-800">
+                  <span class="text-[10px] font-semibold text-slate-400">Simulation Scenarios:</span>
+                  <div class="grid grid-cols-2 gap-1.5 mt-1.5">
+                    <button onclick="applyPreset('aggressiveGrowth')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-[10px] font-medium text-left">
+                      🚀 Scale Up (+45%)
+                    </button>
+                    <button onclick="applyPreset('priceHike')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-[10px] font-medium text-left">
+                      💎 Price Hike (+20%)
+                    </button>
+                    <button onclick="applyPreset('retentionDefense')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-[10px] font-medium text-left">
+                      🛡️ Churn Shield (0.8%)
+                    </button>
+                    <button onclick="applyPreset('downturnStress')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-[10px] font-medium text-left">
+                      ⚠️ Stress Test
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="lg:col-span-2">
+                <div class="h-48">
+                  <canvas id="digitalTwinChart"></canvas>
+                </div>
+                <!-- Monte Carlo Confidence Interval Scenarios -->
+                <div class="grid grid-cols-3 gap-2 mt-2 pt-2 border-t border-slate-200 dark:border-slate-800 text-center">
+                  <div class="p-2 rounded bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <span class="text-[10px] text-slate-400">Worst-Case (P10)</span>
+                    <div id="simWorstCase" class="text-xs font-bold text-rose-600 dark:text-rose-400 font-mono mt-0.5">$940k</div>
+                  </div>
+                  <div class="p-2 rounded bg-brand-light dark:bg-slate-800 border border-brand/30">
+                    <span class="text-[10px] text-brand font-bold">Expected-Case (P50)</span>
+                    <div id="simExpectedCase" class="text-xs font-bold text-brand font-mono mt-0.5">$1.21M</div>
+                    <span id="simExpectedDelta" class="text-[10px] text-accent font-bold block">+$204.8k (+20.2%)</span>
+                  </div>
+                  <div class="p-2 rounded bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <span class="text-[10px] text-slate-400">Best-Case (P90)</span>
+                    <div id="simBestCase" class="text-xs font-bold text-accent font-mono mt-0.5">$1.48M</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: AI DECISION ENGINE ================= -->
+        <section id="view-decisions" class="space-y-4 hidden">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-accent-light dark:bg-slate-800 text-accent">Pillar 5: AI Decision Engine</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400">Human-in-the-Loop Governance</span>
+              </div>
+              <h2 class="text-sm font-bold text-slate-900 dark:text-white mt-1">Autonomous Recommendations & Strategy Optimization</h2>
+            </div>
+            <button onclick="showToast('AI synthesized fresh optimization policies.', 'info')" class="px-2.5 py-1 rounded bg-brand hover:bg-brand-hover text-white text-xs font-bold">
+              Refresh Strategies
+            </button>
+          </div>
+
+          <!-- Strategy Cards with Expected Financial Impact -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-brand-light dark:bg-slate-800 text-brand">Pricing Optimization</span>
+                  <span class="text-[11px] font-bold text-accent">+ $24.5k ARR</span>
+                </div>
+                <h3 class="text-xs font-bold text-slate-900 dark:text-white mt-2">Adjust Pro Tier to $539/mo with Grandfathering</h3>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Expected net lift: +$24.5k ARR with minimal 0.4% churn resistance.</p>
+              </div>
+              <button onclick="approveStrategy(1)" id="btn-strat-1" class="mt-3 w-full py-1.5 rounded-lg bg-brand hover:bg-brand-hover text-white text-xs font-bold transition">
+                Approve & Execute Policy
+              </button>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400">Customer Retention</span>
+                  <span class="text-[11px] font-bold text-accent">+ $18.2k Saved</span>
+                </div>
+                <h3 class="text-xs font-bold text-slate-900 dark:text-white mt-2">Annual 15% Lock-in for At-Risk Enterprise</h3>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Automated dispatch of annual rebate to Apex Dynamics and Vortex Global.</p>
+              </div>
+              <button onclick="approveStrategy(2)" id="btn-strat-2" class="mt-3 w-full py-1.5 rounded-lg bg-brand hover:bg-brand-hover text-white text-xs font-bold transition">
+                Approve & Execute Policy
+              </button>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-accent-light dark:bg-slate-800 text-accent">Payment Recovery</span>
+                  <span class="text-[11px] font-bold text-accent">+ $9.8k Rescued</span>
+                </div>
+                <h3 class="text-xs font-bold text-slate-900 dark:text-white mt-2">SMS Paylink Escalation after 48h Overdue</h3>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Upgrade passive emails to instant SMS paylinks for delinquent accounts.</p>
+              </div>
+              <button onclick="approveStrategy(3)" id="btn-strat-3" class="mt-3 w-full py-1.5 rounded-lg bg-brand hover:bg-brand-hover text-white text-xs font-bold transition">
+                Approve & Execute Policy
+              </button>
+            </div>
+          </div>
+
+          <!-- Strategy Comparison Table -->
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <h3 class="text-xs font-bold text-slate-900 dark:text-white mb-2">Strategy Comparison & Trade-off Matrix</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="text-slate-400 border-b border-slate-200 dark:border-slate-800 pb-2">
+                    <th class="py-2">Strategy Proposal</th>
+                    <th class="py-2">Confidence</th>
+                    <th class="py-2">Projected MRR Lift</th>
+                    <th class="py-2">Churn Exposure</th>
+                    <th class="py-2">Execution Mechanism</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-600 dark:text-slate-300">
+                  <tr>
+                    <td class="py-2 font-semibold text-slate-900 dark:text-white">Pro Tier Expansion (+8%)</td>
+                    <td class="py-2 text-accent font-bold">92%</td>
+                    <td class="py-2 font-mono font-bold text-accent">+$2,041/mo</td>
+                    <td class="py-2 text-slate-400">Minimal (-0.3%)</td>
+                    <td class="py-2"><span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800">Grandfathered cohort</span></td>
+                  </tr>
+                  <tr>
+                    <td class="py-2 font-semibold text-slate-900 dark:text-white">Dunning SMS Cascade</td>
+                    <td class="py-2 text-accent font-bold">96%</td>
+                    <td class="py-2 font-mono font-bold text-accent">+$816/mo</td>
+                    <td class="py-2 text-slate-400">Zero</td>
+                    <td class="py-2"><span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800">Webhook SMS API</span></td>
+                  </tr>
+                  <tr>
+                    <td class="py-2 font-semibold text-slate-900 dark:text-white">Annual Rebate Lock-in</td>
+                    <td class="py-2 text-brand font-bold">88%</td>
+                    <td class="py-2 font-mono font-bold text-accent">+$1,516/mo</td>
+                    <td class="py-2 text-slate-400">Mitigates 2 accounts</td>
+                    <td class="py-2"><span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800">15% upfront discount</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: PREDICTION VS ACTUAL PERFORMANCE TRACKING ================= -->
+        <section id="view-tracking" class="space-y-4 hidden">
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-accent-light dark:bg-slate-800 text-accent">Pillar 5: Model Calibration</span>
+                  <span class="text-xs text-slate-500 dark:text-slate-400">Variance & Reliability Metric</span>
+                </div>
+                <h3 class="text-sm font-bold text-slate-900 dark:text-white mt-1">Prediction vs. Actual Performance Tracking</h3>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">Benchmarking historical AI forecasts against realized recurring receipts.</p>
+              </div>
+              <span class="px-2.5 py-1 rounded-md text-xs font-mono font-bold bg-accent-light dark:bg-slate-800 text-accent">
+                Overall Accuracy: 97.4%
+              </span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="text-slate-400 border-b border-slate-200 dark:border-slate-800 pb-2">
+                    <th class="py-2">Fiscal Cycle</th>
+                    <th class="py-2">AI Forecasted MRR</th>
+                    <th class="py-2">Actual Realized MRR</th>
+                    <th class="py-2">Variance ($)</th>
+                    <th class="py-2">Variance (%)</th>
+                    <th class="py-2 text-right">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                  <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                    <td class="py-2.5 font-bold text-slate-900 dark:text-white">Jul 2026</td>
+                    <td class="py-2.5 font-mono text-slate-500 dark:text-slate-400">$63,800</td>
+                    <td class="py-2.5 font-mono font-bold text-slate-900 dark:text-white">$64,200</td>
+                    <td class="py-2.5 font-mono text-accent">+$400</td>
+                    <td class="py-2.5 text-accent font-semibold">+0.62%</td>
+                    <td class="py-2.5 text-right"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-accent-light dark:bg-slate-800 text-accent">Calibrated</span></td>
+                  </tr>
+                  <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                    <td class="py-2.5 font-bold text-slate-900 dark:text-white">Aug 2026</td>
+                    <td class="py-2.5 font-mono text-slate-500 dark:text-slate-400">$71,500</td>
+                    <td class="py-2.5 font-mono font-bold text-slate-900 dark:text-white">$71,000</td>
+                    <td class="py-2.5 font-mono text-rose-500">-$500</td>
+                    <td class="py-2.5 text-rose-500 font-semibold">-0.70%</td>
+                    <td class="py-2.5 text-right"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-accent-light dark:bg-slate-800 text-accent">Calibrated</span></td>
+                  </tr>
+                  <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                    <td class="py-2.5 font-bold text-slate-900 dark:text-white">Sep 2026</td>
+                    <td class="py-2.5 font-mono text-slate-500 dark:text-slate-400">$77,900</td>
+                    <td class="py-2.5 font-mono font-bold text-slate-900 dark:text-white">$78,400</td>
+                    <td class="py-2.5 font-mono text-accent">+$500</td>
+                    <td class="py-2.5 text-accent font-semibold">+0.64%</td>
+                    <td class="py-2.5 text-right"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-accent-light dark:bg-slate-800 text-accent">Calibrated</span></td>
+                  </tr>
+                  <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                    <td class="py-2.5 font-bold text-slate-900 dark:text-white">Oct 2026 (Current)</td>
+                    <td class="py-2.5 font-mono text-slate-500 dark:text-slate-400">$83,900</td>
+                    <td class="py-2.5 font-mono font-bold text-brand">$84,250</td>
+                    <td class="py-2.5 font-mono text-accent">+$350</td>
+                    <td class="py-2.5 text-accent font-semibold">+0.42%</td>
+                    <td class="py-2.5 text-right"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-light dark:bg-slate-800 text-brand">Current Cycle</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: SAAS METRICS & REPORTS ================= -->
+        <section id="view-analytics" class="space-y-4 hidden">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <span class="text-[11px] text-slate-400 font-semibold">Net Retention (NRR)</span>
+              <div class="text-xl font-bold font-display text-accent mt-1">118.4%</div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <span class="text-[11px] text-slate-400 font-semibold">Customer CAC</span>
+              <div class="text-xl font-bold font-display text-slate-900 dark:text-white mt-1">$1,840</div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <span class="text-[11px] text-slate-400 font-semibold">Quick Ratio</span>
+              <div class="text-xl font-bold font-display text-brand mt-1">4.2x</div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <span class="text-[11px] text-slate-400 font-semibold">Gross Margin</span>
+              <div class="text-xl font-bold font-display text-accent mt-1">84.2%</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: SETTINGS & TAX ================= -->
+        <section id="view-settings" class="space-y-4 hidden">
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-w-xl">
+            <h3 class="text-xs font-bold text-slate-900 dark:text-white mb-3">Business Rules & Tax Defaults</h3>
+            <div class="space-y-3 text-xs">
+              <div>
+                <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Base Currency</label>
+                <select id="settingCurrency" class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white">
+                  <option value="USD">USD ($) - United States Dollar</option>
+                  <option value="INR">INR (₹) - Indian Rupee</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Default Tax Rate (%)</label>
+                <input id="settingDefaultTax" type="number" value="18.0" class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white">
+              </div>
+              <button onclick="saveBusinessSettings()" class="w-full py-2 rounded-lg bg-brand hover:bg-brand-hover text-white font-bold">
+                Save Settings
+              </button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ================= QUOTATION / SUBSCRIPTION MODAL ================= -->
+  <div id="quotationModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="w-full max-w-md rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-5">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+        <h3 class="text-xs font-bold text-slate-900 dark:text-white">Create Customer Quotation</h3>
+        <button onclick="closeQuotationModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="quotationForm" onsubmit="handleCreateQuotation(event)" class="space-y-3 pt-3 text-xs">
+        <div>
+          <label class="block font-medium mb-1 text-slate-700 dark:text-slate-300">Company Name</label>
+          <input required id="quoteCustName" type="text" placeholder="Acme Systems Corp" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-slate-800 dark:text-white focus:outline-none focus:border-brand">
+        </div>
+        <div>
+          <label class="block font-medium mb-1 text-slate-700 dark:text-slate-300">Billing Email</label>
+          <input required id="quoteCustEmail" type="email" placeholder="finance@acme.com" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-slate-800 dark:text-white focus:outline-none focus:border-brand font-mono">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-medium mb-1 text-slate-700 dark:text-slate-300">Subscription Tier</label>
+            <select id="quotePlanSelect" onchange="updateQuotationCalculation()" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-slate-800 dark:text-white">
+              <option value="Starter" data-price="149">Starter Cloud ($149)</option>
+              <option value="Pro" data-price="499" selected>Professional Pro ($499)</option>
+              <option value="Enterprise" data-price="1450">Enterprise Twin ($1,450)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-slate-700 dark:text-slate-300">Cadence</label>
+            <select id="quoteBillingInterval" onchange="updateQuotationCalculation()" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-slate-800 dark:text-white">
+              <option value="Monthly">Monthly</option>
+              <option value="Annual">Annual (15% Rebate)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="p-2.5 rounded bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 font-mono text-[11px] space-y-1">
+          <div class="flex justify-between">
+            <span>Base:</span>
+            <span id="quoteSummaryBase">$499.00</span>
+          </div>
+          <div class="flex justify-between font-bold text-brand">
+            <span>Total Recurring:</span>
+            <span id="quoteSummaryTotal">$538.92</span>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeQuotationModal()" class="px-3 py-1.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold">Cancel</button>
+          <button type="submit" class="px-4 py-1.5 rounded bg-brand hover:bg-brand-hover text-white font-bold">Activate</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= AI FINANCIAL COPILOT DRAWER ================= -->
+  <div id="copilotDrawer" class="fixed right-0 top-0 bottom-0 w-80 max-w-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl z-40 transform translate-x-full transition-transform duration-300 flex flex-col">
+    <div class="h-14 px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded bg-brand text-white flex items-center justify-center font-bold text-xs">
+          <i data-lucide="bot" class="w-3.5 h-3.5"></i>
+        </div>
+        <h3 class="text-xs font-bold text-slate-900 dark:text-white">Financial Copilot</h3>
+      </div>
+      <button onclick="toggleCopilot()" class="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-white">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+    <div id="copilotChatStream" class="flex-1 overflow-y-auto p-3 space-y-2 text-xs">
+      <div class="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200">
+        <p class="font-bold text-brand mb-1">Subtrix Sentry 👋</p>
+        <p>Live financial intelligence grounded in USD ($) and INR (₹) database state.</p>
+        <button onclick="askCopilotPredefined('What is our exact MRR and active subscription count?')" class="w-full text-left p-1.5 mt-2 rounded bg-white dark:bg-slate-900 text-[11px] text-brand border border-slate-200 dark:border-slate-700">
+          📊 "What is our current MRR & account count?"
+        </button>
+      </div>
+    </div>
+
+    <div class="p-3 border-t border-slate-200 dark:border-slate-800">
+      <form onsubmit="handleCopilotSubmit(event)" class="flex gap-2">
+        <input id="copilotInput" type="text" placeholder="Ask financial assistant..." class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-2.5 py-1.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-brand">
+        <button type="submit" class="p-2 rounded bg-brand hover:bg-brand-hover text-white transition shrink-0">
+          <i data-lucide="send" class="w-3.5 h-3.5"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= AUTHENTICATION MODAL ================= -->
+  <div id="authModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="w-full max-w-sm rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-5 relative">
+      <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <div class="flex items-center gap-2.5 mb-4">
+        <div class="w-8 h-8 rounded-lg bg-brand text-white flex items-center justify-center font-bold text-xs font-display">
+          SX
+        </div>
+        <div>
+          <h3 id="authModalTitle" class="text-xs font-bold text-slate-900 dark:text-white">Workspace Sign In</h3>
+          <p class="text-[10px] text-slate-500 dark:text-slate-400">Authenticate with corporate credentials</p>
+        </div>
+      </div>
+
+      <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Corporate Email</label>
+          <input required id="authInputEmail" type="email" placeholder="alex.drake@enterprise.io" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white focus:outline-none focus:border-brand font-mono">
+        </div>
+        <div>
+          <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Password</label>
+          <div class="relative">
+            <input required id="authInputPassword" type="password" placeholder="••••••••••••" class="w-full p-2 pr-8 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white focus:outline-none focus:border-brand font-mono">
+            <button type="button" onclick="togglePasswordVisibility()" class="absolute right-2.5 top-2 text-slate-400 hover:text-slate-200">
+              <i data-lucide="eye" id="eyeIcon" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+        <div class="flex justify-between items-center text-[11px]">
+          <button type="button" onclick="quickFillDemoCreds()" class="text-brand font-semibold hover:underline">Quick-fill Demo</button>
+        </div>
+        <button type="submit" class="w-full py-2 rounded-lg bg-brand hover:bg-brand-hover text-white font-bold transition">
+          Authenticate
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT APPLICATION CORE -->
+  <script>
+    const state = {
+      theme: 'dark',
+      activeTab: 'dashboard',
+      currentRole: 'admin', // 'admin' | 'staff' | 'customer'
+      currency: 'USD',
+      fxRate: 83.50, // 1 USD = 83.50 INR
+      lang: 'en',
+      auth: {
+        isAuthenticated: true,
+        name: 'Alex Drake',
+        email: 'alex.drake@enterprise.io',
+        role: 'RevOps Executive'
+      },
+      staffList: [
+        { id: 'STF-101', name: 'Sarah Chen', email: 'sarah.chen@subtrix.io', role: 'Staff Operations', permissions: 'Assigned Portfolios, Invoicing, Customer Support', status: 'Active' },
+        { id: 'STF-102', name: 'Marcus Brody', email: 'marcus.brody@subtrix.io', role: 'Billing Specialist', permissions: 'Quotations, Manual Payments, Overdue Tracking', status: 'Active' },
+        { id: 'STF-103', name: 'Elena Rostova', email: 'elena.rostova@subtrix.io', role: 'Support Agent', permissions: 'Customer Service, Tickets, Follow-ups', status: 'Active' }
+      ],
+      plans: {
+        Starter: { name: 'Starter Cloud', price: 149 },
+        Pro: { name: 'Professional Pro', price: 499 },
+        Enterprise: { name: 'Enterprise Twin', price: 1450 }
+      },
+      variants: [
+        { id: 'VAR-01', name: 'High-Volume API Metering', baseTier: 'Pro', unitPrice: 49, metric: 'per 50k calls', activeAccounts: 48 },
+        { id: 'VAR-02', name: 'Dedicated Cloud VPC Tenant', baseTier: 'Enterprise', unitPrice: 350, metric: 'per isolated cluster', activeAccounts: 18 },
+        { id: 'VAR-03', name: 'Compliance & Audit Shield (SOC2)', baseTier: 'Enterprise', unitPrice: 199, metric: 'annual certificate', activeAccounts: 29 },
+        { id: 'VAR-04', name: 'White-label Client Portal', baseTier: 'Starter', unitPrice: 39, metric: 'custom domain', activeAccounts: 42 }
+      ],
+      customers: [
+        { id: 'CUST-101', name: 'Nexus Synthetics', email: 'billing@nexussynth.com', plan: 'Enterprise', cadence: 'Annual', mrr: 1450, status: 'Active', healthScore: 94, churnRisk: 'Low', nextBill: 'Nov 14, 2026' },
+        { id: 'CUST-102', name: 'HyperFlow Media', email: 'finance@hyperflow.io', plan: 'Pro', cadence: 'Monthly', mrr: 499, status: 'Active', healthScore: 89, churnRisk: 'Low', nextBill: 'Nov 18, 2026' },
+        { id: 'CUST-103', name: 'Apex Dynamics', email: 'accounts@apexdynamics.com', plan: 'Enterprise', cadence: 'Monthly', mrr: 1450, status: 'Active', healthScore: 42, churnRisk: 'High', nextBill: 'Nov 04, 2026' },
+        { id: 'CUST-104', name: 'Vortex Global', email: 'pay@vortexgloballlc.com', plan: 'Pro', cadence: 'Monthly', mrr: 499, status: 'Delinquent', healthScore: 35, churnRisk: 'Critical', nextBill: 'Overdue (3d)' },
+        { id: 'CUST-105', name: 'Stratum Analytics', email: 'revops@stratumanalytics.co', plan: 'Pro', cadence: 'Annual', mrr: 499, status: 'Active', healthScore: 78, churnRisk: 'Medium', nextBill: 'Nov 22, 2026' },
+        { id: 'CUST-106', name: 'Quantum Leap Labs', email: 'admin@quantumleap.tech', plan: 'Starter', cadence: 'Monthly', mrr: 149, status: 'Active', healthScore: 98, churnRisk: 'Low', nextBill: 'Nov 09, 2026' },
+        { id: 'CUST-107', name: 'BluePeak Systems', email: 'billing@bluepeak.net', plan: 'Pro', cadence: 'Monthly', mrr: 499, status: 'Delinquent', healthScore: 31, churnRisk: 'Critical', nextBill: 'Overdue (5d)' },
+        { id: 'CUST-108', name: 'Elevate Cloudworks', email: 'ops@elevatecw.io', plan: 'Starter', cadence: 'Annual', mrr: 149, status: 'Paused', healthScore: 54, churnRisk: 'Medium', nextBill: 'Paused' }
+      ],
+      invoices: [
+        { id: 'INV-2026-0891', customer: 'Nexus Synthetics', plan: 'Enterprise Twin', subtotal: 1450, tax: 116, total: 1566, status: 'Paid', date: 'Oct 14, 2026' },
+        { id: 'INV-2026-0892', customer: 'HyperFlow Media', plan: 'Professional Pro', subtotal: 499, tax: 39.92, total: 538.92, status: 'Paid', date: 'Oct 18, 2026' },
+        { id: 'INV-2026-0893', customer: 'Vortex Global', plan: 'Professional Pro', subtotal: 499, tax: 39.92, total: 538.92, status: 'Failed', date: 'Oct 28, 2026' },
+        { id: 'INV-2026-0894', customer: 'BluePeak Systems', plan: 'Professional Pro', subtotal: 499, tax: 39.92, total: 538.92, status: 'Failed', date: 'Oct 26, 2026' },
+        { id: 'INV-2026-0895', customer: 'Apex Dynamics', plan: 'Enterprise Twin', subtotal: 1450, tax: 116, total: 1566, status: 'Pending', date: 'Nov 04, 2026' }
+      ],
+      recoveries: [
+        { id: 'REC-301', customer: 'Vortex Global', invId: 'INV-2026-0893', amount: 538.92, code: 'insufficient_funds', diagnosis: 'Payroll mismatch; card decline during low-balance window.', recommendation: 'Smart Auto-Retry on Friday morning 08:30 AM + SMS paylink.', status: 'Queued' },
+        { id: 'REC-302', customer: 'BluePeak Systems', invId: 'INV-2026-0894', amount: 538.92, code: 'expired_card', diagnosis: 'Card valid-thru passed 10/26.', recommendation: 'Invoke Account Updater token refresh.', status: 'Queued' }
+      ],
+      activityLog: [
+        { customer: 'HyperFlow Media', event: 'Billing Reconciled', plan: 'Professional Pro', val: 538.92, isPositive: true, status: 'Settled', time: '8m ago' },
+        { customer: 'Vortex Global', event: 'Payment Decline', plan: 'Professional Pro', val: 538.92, isPositive: false, status: 'Dunning', time: '24m ago' },
+        { customer: 'Nexus Synthetics', event: 'Tier Renewal', plan: 'Enterprise Twin', val: 1566.00, isPositive: true, status: 'Settled', time: '1h ago' }
+      ]
+    };
+
+    /* ==========================================================
+       ROLE BASED ACCESS CONTROL (RBAC) SWITCHER
+       ========================================================== */
+    function switchUserRole(role) {
+      state.currentRole = role;
+      const roles = ['admin', 'staff', 'customer'];
+      roles.forEach(r => {
+        const btn = document.getElementById(`roleBtn-${r}`);
+        if (btn) {
+          if (r === role) {
+            btn.className = 'px-2 py-1 rounded-md text-[10px] font-bold transition bg-brand text-white shadow-xs';
+          } else {
+            btn.className = 'px-2 py-1 rounded-md text-[10px] font-bold transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+          }
+        }
+      });
+
+      const navUserName = document.getElementById('navUserName');
+      const navUserRole = document.getElementById('navUserRole');
+
+      if (role === 'admin') {
+        if (navUserName) navUserName.innerText = 'Alex Drake';
+        if (navUserRole) navUserRole.innerText = 'Admin (Complete Control)';
+        switchTab('dashboard');
+        showToast('Switched to Admin Role: Complete platform governance active.', 'info');
+      } else if (role === 'staff') {
+        if (navUserName) navUserName.innerText = 'Sarah Chen';
+        if (navUserRole) navUserRole.innerText = 'Staff (Daily Operations)';
+        switchTab('staffops');
+        showToast('Switched to Staff Role: Operations, support and quotations view.', 'info');
+      } else {
+        if (navUserName) navUserName.innerText = 'Nexus Synthetics';
+        if (navUserRole) navUserRole.innerText = 'Customer (Self-Service)';
+        switchTab('customerportal');
+        showToast('Switched to Customer Portal: Self-service management view.', 'info');
+      }
+    }
+
+    function renderStaffAccounts() {
+      const tbody = document.getElementById('staffAccountsTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      state.staffList.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-800/40 transition';
+        tr.innerHTML = `
+          <td class="py-2.5 font-bold text-slate-900 dark:text-white">${s.name}</td>
+          <td class="py-2.5 font-mono text-slate-500">${s.email}</td>
+          <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-light dark:bg-slate-800 text-brand">${s.role}</span></td>
+          <td class="py-2.5 text-slate-600 dark:text-slate-300 text-xs">${s.permissions}</td>
+          <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-accent-light dark:bg-slate-800 text-accent">${s.status}</span></td>
+          <td class="py-2.5 text-right">
+            <button onclick="showToast('Permission scope updated for ${s.name}', 'success')" class="text-xs text-brand font-bold hover:underline">Edit Role</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    function promptCreateStaffAccount() {
+      const name = window.prompt("Enter new Staff Member Name:", "David Vance");
+      if (!name) return;
+      const email = window.prompt("Enter Staff Corporate Email:", "david.vance@subtrix.io");
+      const role = window.prompt("Enter Role (Operations / Billing / Support):", "Operations");
+
+      state.staffList.push({
+        id: `STF-10${state.staffList.length + 1}`,
+        name: name,
+        email: email || `${name.toLowerCase().replace(' ', '.')}@subtrix.io`,
+        role: role || 'Staff Operations',
+        permissions: 'Assigned Portfolios, Invoices, Customer Support',
+        status: 'Active'
+      });
+      renderStaffAccounts();
+      showToast(`Created staff account for ${name} with ${role} permissions.`, 'success');
+    }
+
+    function staffSendFollowup(customerName) {
+      showToast(`Automated payment & subscription reminder dispatched to ${customerName}.`, 'success');
+    }
+
+    function escalateToAdmin(reason) {
+      showToast(`Escalated "${reason}" directly to Admin Alex Drake with high-priority tag.`, 'info');
+    }
+
+    function resolveStaffTicket(ticketId) {
+      showToast(`Ticket ${ticketId} resolved and archived.`, 'success');
+    }
+
+    function promptLogAuthorizedPayment() {
+      const cust = window.prompt("Enter Customer Name for authorized payment:", "Vortex Global");
+      if (!cust) return;
+      const amtStr = window.prompt("Enter received payment amount ($):", "538.92");
+      const amt = parseFloat(amtStr) || 538.92;
+
+      state.invoices.unshift({
+        id: `INV-2026-AUTH-${Math.floor(100 + Math.random() * 900)}`,
+        customer: cust,
+        plan: 'Professional Pro',
+        subtotal: amt / 1.08,
+        tax: amt - (amt / 1.08),
+        total: amt,
+        status: 'Paid',
+        date: 'Today (Staff Auth)'
+      });
+
+      renderInvoiceTable();
+      renderInvoiceLedgerTable();
+      recalculateMetrics();
+      showToast(`Recorded authorized payment of ${formatCurrency(amt)} for ${cust}!`, 'success');
+    }
+
+    function promptRaiseSupportTicket() {
+      const query = window.prompt("Enter your support inquiry or change request:", "Request upgrade to Annual 15% discount terms");
+      if (query) {
+        showToast("Support ticket raised. Staff will respond within 4 hours.", "success");
+      }
+    }
+
+    function promptCustomerPayment() {
+      showToast("Directing to secure payment card gateway... Payment simulated successfully!", "success");
+    }
+
+    /* ==========================================================
+       15 DASHBOARD METRICS CALCULATION ENGINE & DYNAMIC AI INSIGHTS
+       ========================================================== */
+    function recalculateMetrics() {
+      // 1. Total Customers
+      const totalCustomers = state.customers.length;
+      // 2. Active Subscriptions
+      const activeCustomers = state.customers.filter(c => c.status === 'Active');
+      const activeSubs = activeCustomers.length;
+      // 3. New Subscriptions (mocked active recent)
+      const newSubs = 3;
+      // 4. Cancelled Subscriptions
+      const cancelledSubs = 1;
+      // 5. Paused Subscriptions
+      const pausedSubs = state.customers.filter(c => c.status === 'Paused').length;
+      // 6. MRR
+      const totalMRR = activeCustomers.reduce((acc, c) => acc + c.mrr, 0);
+      // 7. ARR
+      const totalARR = totalMRR * 12;
+      // 8. Total Collected Revenue
+      const paidInvoices = state.invoices.filter(i => i.status === 'Paid');
+      const collectedRev = paidInvoices.reduce((acc, i) => acc + i.total, 0) + 100000;
+      // 9. Outstanding Invoices
+      const pendingInvoices = state.invoices.filter(i => i.status === 'Pending');
+      const outstandingCount = pendingInvoices.length;
+      const outstandingVal = pendingInvoices.reduce((acc, i) => acc + i.total, 0);
+      // 10. Overdue Invoices
+      const failedInvoices = state.invoices.filter(i => i.status === 'Failed');
+      const overdueCount = failedInvoices.length;
+      const overdueVal = failedInvoices.reduce((acc, i) => acc + i.total, 0);
+      // 11. Failed Payments
+      const failedCount = state.recoveries.length;
+      // 12. Churn Rate
+      const churnRate = 1.82;
+      // 13. Retention Rate
+      const retentionRate = (100 - churnRate).toFixed(2);
+      // 14. Avg Customer LTV
+      const ltvVal = 8940;
+      // 15. Upcoming Renewals
+      const upcomingRenewals = state.customers.filter(c => c.nextBill.includes('Nov')).length;
+
+      // Update DOM for all 15 metrics
+      const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+
+      setTxt('m-totalCustomers', totalCustomers);
+      setTxt('m-activeSubs', activeSubs);
+      setTxt('m-newSubs', `+${newSubs}`);
+      setTxt('m-cancelledSubs', cancelledSubs);
+      setTxt('m-pausedSubs', pausedSubs);
+      setTxt('m-mrr', formatCurrency(totalMRR));
+      setTxt('m-arr', formatCurrency(totalARR));
+      setTxt('m-collectedRev', formatCurrency(collectedRev));
+      setTxt('m-outstandingInv', `${outstandingCount} Due`);
+      setTxt('m-outstandingVal', `${formatCurrency(outstandingVal, { decimals: 2 })} queued`);
+      setTxt('m-overdueInv', `${overdueCount} Overdue`);
+      setTxt('m-overdueVal', `${formatCurrency(overdueVal, { decimals: 2 })} at risk`);
+      setTxt('m-failedPayments', `${failedCount} Cases`);
+      setTxt('m-churnRate', `${churnRate}%`);
+      setTxt('m-retentionRate', `${retentionRate}%`);
+      setTxt('m-ltv', formatCurrency(ltvVal));
+      setTxt('m-upcomingRenewals', `${upcomingRenewals} Renewals`);
+
+      // Update legacy dashboard stat cards if present
+      setTxt('statMRR', formatCurrency(totalMRR));
+      setTxt('statARR', formatCurrency(totalARR));
+      setTxt('statActiveSubs', activeSubs);
+      setTxt('badgeTotalCustomers', totalCustomers);
+      setTxt('badgePendingInvoices', `${outstandingCount} Due`);
+
+      // Dynamic AI Diagnosis Sentence grounded directly in store numbers
+      const aiTextEl = document.getElementById('aiDashboardInsightText');
+      if (aiTextEl) {
+        aiTextEl.innerHTML = `Your monthly recurring revenue stands at <strong class="text-accent font-bold">${formatCurrency(totalMRR)}</strong> (+14% increase vs last month). However, <strong class="text-rose-500 font-bold">${failedCount} accounts</strong> have payment delinquency risk, and <strong class="text-rose-500 font-bold">${formatCurrency(overdueVal, { decimals: 2 })}</strong> in invoices are currently overdue.`;
+      }
+
+      // Update Plan Counts & Shares
+      const starterCount = state.customers.filter(c => c.plan === 'Starter').length;
+      const proCount = state.customers.filter(c => c.plan === 'Pro').length;
+      const entCount = state.customers.filter(c => c.plan === 'Enterprise').length;
+
+      setTxt('starterSubCount', `${starterCount} Subscribers`);
+      setTxt('proSubCount', `${proCount} Subscribers`);
+      setTxt('enterpriseSubCount', `${entCount} Subscribers`);
+
+      const totalPlanCount = starterCount + proCount + entCount || 1;
+      setTxt('shareStarter', `${Math.round((starterCount / totalPlanCount) * 100)}%`);
+      setTxt('sharePro', `${Math.round((proCount / totalPlanCount) * 100)}%`);
+      setTxt('shareEnterprise', `${Math.round((entCount / totalPlanCount) * 100)}%`);
+    }
+
+    function formatCurrency(usdValue, options = {}) {
+      const isUSD = state.currency === 'USD';
+      if (isUSD) {
+        return '$' + Number(usdValue).toLocaleString('en-US', {
+          minimumFractionDigits: options.decimals ?? 0,
+          maximumFractionDigits: options.decimals ?? 0
+        });
+      } else {
+        const inrValue = usdValue * state.fxRate;
+        return '₹' + Number(inrValue).toLocaleString('en-IN', {
+          minimumFractionDigits: options.decimals ?? 0,
+          maximumFractionDigits: options.decimals ?? 0
+        });
+      }
+    }
+
+    function setGlobalCurrency(currency) {
+      state.currency = currency;
+      const btnUSD = document.getElementById('curToggleUSD');
+      const btnINR = document.getElementById('curToggleINR');
+
+      if (currency === 'USD') {
+        btnUSD.className = 'px-2 py-1 rounded-md text-[11px] font-bold transition bg-brand text-white shadow-xs';
+        btnINR.className = 'px-2 py-1 rounded-md text-[11px] font-bold transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+      } else {
+        btnINR.className = 'px-2 py-1 rounded-md text-[11px] font-bold transition bg-brand text-white shadow-xs';
+        btnUSD.className = 'px-2 py-1 rounded-md text-[11px] font-bold transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+      }
+
+      recalculateMetrics();
+      renderCustomerTable();
+      renderInvoiceTable();
+      renderInvoiceLedgerTable();
+      renderRecoveryTable();
+      renderActivityFeed();
+      updateCatalogPlanPrices();
+      updateOverviewChart();
+      runDigitalTwinSimulation();
+      showToast(`Switched currency to ${currency} (Rate: ₹${state.fxRate.toFixed(2)}/$).`, 'success');
+    }
+
+    /* ==========================================================
+       DYNAMIC FX RATE CONTROLLER (INCREASE / DECREASE / MANUAL)
+       ========================================================== */
+    function adjustFxRate(delta) {
+      const nextRate = Math.max(1, Number((state.fxRate + delta).toFixed(2)));
+      applyNewFxRate(nextRate);
+      showToast(`Dollar exchange rate adjusted to ₹${state.fxRate.toFixed(2)}/$`, 'info');
+    }
+
+    function promptEditFxRate() {
+      const input = window.prompt("Enter new exchange rate for 1 USD in INR (₹):", state.fxRate.toFixed(2));
+      if (input !== null) {
+        const parsed = parseFloat(input);
+        if (!isNaN(parsed) && parsed > 0) {
+          applyNewFxRate(Number(parsed.toFixed(2)));
+          showToast(`Exchange rate updated: 1 USD = ₹${state.fxRate.toFixed(2)}`, 'success');
+        } else {
+          showToast("Invalid exchange rate value.", "error");
+        }
+      }
+    }
+
+    function applyNewFxRate(newRate) {
+      state.fxRate = newRate;
+      const displayEl = document.getElementById('fxRateDisplay');
+      if (displayEl) {
+        displayEl.innerText = `1$ = ₹${newRate.toFixed(2)}`;
+      }
+
+      recalculateMetrics();
+      renderCustomerTable();
+      renderInvoiceTable();
+      renderInvoiceLedgerTable();
+      renderRecoveryTable();
+      renderActivityFeed();
+      updateCatalogPlanPrices();
+      updateOverviewChart();
+      runDigitalTwinSimulation();
+      lucide.createIcons();
+    }
+
+    function changeGlobalLanguage(langCode) {
+      state.lang = langCode;
+      const dict = translations[langCode] || translations.en;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) {
+          el.innerText = dict[key];
+        }
+      });
+      showToast(`Language switched to ${langCode.toUpperCase()}`, 'info');
+    }
+
+    function updateCatalogPlanPrices() {
+      const starterPrice = state.plans.Starter.price;
+      const proPrice = state.plans.Pro.price;
+      const entPrice = state.plans.Enterprise.price;
+
+      document.getElementById('starterPriceDisplay').innerText = formatCurrency(starterPrice);
+      document.getElementById('proPriceDisplay').innerText = formatCurrency(proPrice);
+      document.getElementById('enterprisePriceDisplay').innerText = formatCurrency(entPrice);
+
+      document.getElementById('starterArrDisplay').innerText = `ARR: ${formatCurrency(starterPrice * 84 * 12)}`;
+      document.getElementById('proArrDisplay').innerText = `ARR: ${formatCurrency(proPrice * 71 * 12)}`;
+      document.getElementById('enterpriseArrDisplay').innerText = `ARR: ${formatCurrency(entPrice * 31 * 12)}`;
+    }
+
+    let overviewRevChartInstance = null;
+    let overviewPieChartInstance = null;
+    let predictiveChartInstance = null;
+    let digitalTwinChartInstance = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      initAllCharts();
+      renderCustomerTable();
+      renderInvoiceTable();
+      renderInvoiceLedgerTable();
+      renderRecoveryTable();
+      renderActivityFeed();
+      renderChurnRadar();
+      renderVariants();
+      renderStaffAccounts();
+      recalculateMetrics();
+      updateCatalogPlanPrices();
+      runDigitalTwinSimulation();
+    });
+
+    function toggleTheme() {
+      const htmlEl = document.documentElement;
+      const sunIcon = document.getElementById('sunIcon');
+      const moonIcon = document.getElementById('moonIcon');
+
+      if (htmlEl.classList.contains('dark')) {
+        htmlEl.classList.remove('dark');
+        state.theme = 'light';
+        sunIcon.classList.remove('hidden');
+        moonIcon.classList.add('hidden');
+      } else {
+        htmlEl.classList.add('dark');
+        state.theme = 'dark';
+        sunIcon.classList.add('hidden');
+        moonIcon.classList.remove('hidden');
+      }
+      updateChartThemeColors();
+      lucide.createIcons();
+    }
+
+    function toggleAccountMenu() {
+      const menu = document.getElementById('accountMenuDropdown');
+      menu.classList.toggle('hidden');
+      lucide.createIcons();
+    }
+
+    function openAuthModal(mode = 'signin') {
+      const modal = document.getElementById('authModal');
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeAuthModal() {
+      const modal = document.getElementById('authModal');
+      modal.classList.add('hidden');
+    }
+
+    function togglePasswordVisibility() {
+      const input = document.getElementById('authInputPassword');
+      const icon = document.getElementById('eyeIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        input.type = 'password';
+        icon.setAttribute('data-lucide', 'eye');
+      }
+      lucide.createIcons();
+    }
+
+    function quickFillDemoCreds() {
+      document.getElementById('authInputEmail').value = 'alex.drake@enterprise.io';
+      document.getElementById('authInputPassword').value = 'EnterpriseSecPass2026!';
+      showToast('Populated demo credentials.', 'info');
+    }
+
+    function handleAuthSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('authInputEmail').value.trim();
+      const password = document.getElementById('authInputPassword').value;
+
+      if (!email || !password) {
+        showToast('Please provide email and password.', 'error');
+        return;
+      }
+
+      state.auth.name = 'Alex Drake';
+      state.auth.email = email;
+      state.auth.isAuthenticated = true;
+
+      document.getElementById('navUserName').innerText = state.auth.name;
+      document.getElementById('dropUserName').innerText = state.auth.name;
+      document.getElementById('dropUserEmail').innerText = email;
+
+      closeAuthModal();
+      showToast(`Welcome back, ${state.auth.name}!`, 'success');
+    }
+
+    function handleSignOut() {
+      state.auth.isAuthenticated = false;
+      showToast('Signed out of session.', 'info');
+      openAuthModal('signin');
+    }
+
+    function toggleSidebar(forceState = null) {
+      const sidebar = document.getElementById('mainSidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      const isCurrentlyOpen = !sidebar.classList.contains('-translate-x-full');
+
+      const shouldOpen = forceState !== null ? forceState : !isCurrentlyOpen;
+
+      if (shouldOpen) {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('opacity-0', 'pointer-events-none');
+        backdrop.classList.add('opacity-100');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.remove('opacity-100');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+      }
+      lucide.createIcons();
+    }
+
+    window.addEventListener('click', (e) => {
+      const menu = document.getElementById('accountMenuDropdown');
+      if (!e.target.closest('#accountMenuDropdown') && !e.target.closest('button[onclick="toggleAccountMenu()"]')) {
+        menu.classList.add('hidden');
+      }
+    });
+
+    function switchTab(tabId) {
+      state.activeTab = tabId;
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('bg-brand', 'text-white', 'shadow-xs');
+        btn.classList.add('text-slate-600', 'dark:text-slate-300');
+      });
+
+      const currentNavBtn = document.getElementById(`nav-${tabId}`);
+      if (currentNavBtn) {
+        currentNavBtn.classList.remove('text-slate-600', 'dark:text-slate-300');
+        currentNavBtn.classList.add('bg-brand', 'text-white', 'shadow-xs');
+      }
+
+      ['dashboard', 'staffops', 'customerportal', 'staffmgmt', 'subscriptions', 'variants', 'customers', 'billing', 'invoices', 'recovery', 'predictive', 'digitaltwin', 'decisions', 'tracking', 'analytics', 'settings'].forEach(id => {
+        const el = document.getElementById(`view-${id}`);
+        if (el) el.classList.add('hidden');
+      });
+
+      const targetView = document.getElementById(`view-${tabId}`);
+      if (targetView) targetView.classList.remove('hidden');
+
+      const titles = {
+        dashboard: 'Executive Financial Command & Autonomous Intelligence',
+        staffops: 'Staff Operations Hub — Daily Workflows & Task Queue',
+        customerportal: 'Customer Self-Service Portal & Invoicing Records',
+        staffmgmt: 'Staff Accounts, Role Permissions & Access Control',
+        subscriptions: 'Subscription Catalog & Pricing Matrix',
+        variants: 'Product Architecture & SKU Variant Management',
+        customers: 'Active Customer Directory & Lifecycle Management',
+        billing: 'Autonomous Recurring Billing & Gateway Reconciliation',
+        invoices: 'Invoice Repository & General Ledger Records',
+        recovery: 'Autonomous Revenue Recovery Agent & Dunning Queue',
+        predictive: 'Predictive ARR Corridor & Explainable Churn Radar',
+        digitaltwin: 'Business Digital Twin: What-If Simulation Sandbox',
+        decisions: 'AI Decision Engine & Strategy Optimization Hub',
+        tracking: 'Prediction vs Actual Performance Tracking & Model Calibration',
+        analytics: 'SaaS Metric Reports, Unit Economics & Cohort Analysis',
+        settings: 'Business Rules, Tax Jurisdiction & Gateway Configuration'
+      };
+      document.getElementById('pageTitle').innerText = titles[tabId] || 'Subtrix';
+
+      toggleSidebar(false);
+
+      setTimeout(() => {
+        if (tabId === 'dashboard' && overviewRevChartInstance) {
+          overviewRevChartInstance.resize();
+          overviewPieChartInstance.resize();
+        } else if (tabId === 'predictive' && predictiveChartInstance) {
+          predictiveChartInstance.resize();
+        } else if (tabId === 'digitaltwin' && digitalTwinChartInstance) {
+          digitalTwinChartInstance.resize();
+        }
+      }, 50);
+
+      lucide.createIcons();
+    }
+
+    function promptEditPlan(tierName) {
+      const currentPrice = state.plans[tierName].price;
+      const newPriceStr = window.prompt(`Enter new monthly price in USD for ${tierName}:`, currentPrice);
+      if (newPriceStr && !isNaN(newPriceStr)) {
+        const val = parseFloat(newPriceStr);
+        state.plans[tierName].price = val;
+        updateCatalogPlanPrices();
+        recalculateMetrics();
+        showToast(`Updated ${tierName} plan to ${formatCurrency(val)}/mo.`, 'success');
+      }
+    }
+
+    function renderInvoiceLedgerTable() {
+      const tbody = document.getElementById('invoiceLedgerTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const filterVal = document.getElementById('invoiceFilterSelect')?.value || 'ALL';
+      const filtered = state.invoices.filter(i => (filterVal === 'ALL') || (i.status === filterVal));
+
+      filtered.forEach(inv => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-800/40 transition';
+
+        let badge = inv.status === 'Paid'
+          ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-accent-light dark:bg-slate-800 text-accent">Paid</span>'
+          : inv.status === 'Pending'
+          ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-light dark:bg-slate-800 text-brand">Pending</span>'
+          : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400">Failed</span>';
+
+        tr.innerHTML = `
+          <td class="py-2.5 font-mono font-bold text-brand">${inv.id}</td>
+          <td class="py-2.5 font-semibold text-slate-900 dark:text-white">${inv.customer}</td>
+          <td class="py-2.5 text-slate-600 dark:text-slate-300">${inv.plan}</td>
+          <td class="py-2.5 font-mono text-slate-600 dark:text-slate-300">${formatCurrency(inv.subtotal, { decimals: 2 })}</td>
+          <td class="py-2.5 font-mono text-slate-500 dark:text-slate-400">+${formatCurrency(inv.tax, { decimals: 2 })}</td>
+          <td class="py-2.5 font-mono font-bold text-slate-900 dark:text-white">${formatCurrency(inv.total, { decimals: 2 })}</td>
+          <td class="py-2.5">${badge}</td>
+          <td class="py-2.5 text-right">
+            ${inv.status === 'Pending' ? `
+              <button onclick="reconcilePayment('${inv.id}')" class="px-2 py-1 rounded bg-accent hover:bg-accent-hover text-white text-[10px] font-bold">Reconcile</button>
+            ` : `
+              <button onclick="showToast('Receipt PDF downloaded for ${inv.id}', 'info')" class="text-[11px] text-brand hover:underline font-semibold">PDF</button>
+            `}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    function saveBusinessSettings() {
+      const cur = document.getElementById('settingCurrency').value;
+      const tax = document.getElementById('settingDefaultTax').value;
+      showToast(`Configuration saved: Currency ${cur}, Tax nexus ${tax}%.`, 'success');
+    }
+
+    function filterCustomerTable() {
+      const text = document.getElementById('customerSearchInput')?.value || '';
+      const plan = document.getElementById('planFilterSelect')?.value || 'ALL';
+      renderCustomerTable(text, plan);
+    }
+
+    function renderVariants() {
+      const container = document.getElementById('variantsGridContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      state.variants.forEach(v => {
+        const card = document.createElement('div');
+        card.className = 'p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between';
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[9px] font-mono font-bold text-slate-400">${v.id}</span>
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-brand-light dark:bg-slate-800 text-brand">${v.baseTier} Addon</span>
+            </div>
+            <h4 class="text-xs font-bold text-slate-900 dark:text-white leading-tight">${v.name}</h4>
+            <div class="mt-2 mb-2 font-display text-lg font-bold text-slate-900 dark:text-white">
+              ${formatCurrency(v.unitPrice)} <span class="text-[10px] text-slate-500 font-sans font-normal">/${v.metric}</span>
+            </div>
+            <p class="text-[10px] text-slate-500 dark:text-slate-400">Attached to <strong class="text-slate-700 dark:text-slate-300">${v.activeAccounts} accounts</strong></p>
+          </div>
+          <div class="pt-2 mt-3 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs">
+            <span class="text-[10px] text-accent font-semibold">+${formatCurrency(v.unitPrice * v.activeAccounts)} MRR</span>
+            <button onclick="showToast('Variant configuration updated for ${v.name}', 'success')" class="text-[11px] text-brand font-bold hover:underline">Configure</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function promptCreateVariant() {
+      const name = window.prompt("Enter new Add-on / Variant Name:", "Dedicated Slack Channel Support");
+      if (!name) return;
+      const priceStr = window.prompt("Enter monthly price in USD:", "99");
+      const price = parseFloat(priceStr) || 99;
+
+      state.variants.push({
+        id: `VAR-0${state.variants.length + 1}`,
+        name: name,
+        baseTier: 'Pro',
+        unitPrice: price,
+        metric: 'flat fee',
+        activeAccounts: 1
+      });
+      renderVariants();
+      showToast(`Created variant add-on: ${name}!`, 'success');
+    }
+
+    function renderCustomerTable(filterText = '', planFilter = 'ALL') {
+      const tbody = document.getElementById('customerTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const filtered = state.customers.filter(c => {
+        const matchesText = c.name.toLowerCase().includes(filterText.toLowerCase()) || c.email.toLowerCase().includes(filterText.toLowerCase());
+        const matchesPlan = (planFilter === 'ALL') || (c.plan === planFilter);
+        return matchesText && matchesPlan;
+      });
+
+      filtered.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-800/40 transition';
+
+        let statusBadge = c.status === 'Active'
+          ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-accent-light dark:bg-slate-800 text-accent">Active</span>'
+          : c.status === 'Delinquent'
+          ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400">Delinquent</span>'
+          : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-400">Paused</span>';
+
+        let riskBadge = `<span class="text-accent font-semibold">${c.healthScore}/100</span>`;
+
+        tr.innerHTML = `
+          <td class="py-2.5">
+            <div class="font-bold text-slate-900 dark:text-white text-xs">${c.name}</div>
+            <div class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">${c.email}</div>
+          </td>
+          <td class="py-2.5 font-medium text-slate-700 dark:text-slate-300">${c.plan}</td>
+          <td class="py-2.5">${statusBadge}</td>
+          <td class="py-2.5">${riskBadge}</td>
+          <td class="py-2.5 font-mono font-bold text-slate-900 dark:text-white">${formatCurrency(c.mrr)}/mo</td>
+          <td class="py-2.5 text-slate-500 dark:text-slate-400">${c.nextBill}</td>
+          <td class="py-2.5 text-right">
+            <div class="flex items-center justify-end gap-1.5">
+              ${c.plan !== 'Enterprise' ? `
+                <button onclick="changeCustomerPlan('${c.id}', 'Enterprise')" class="px-2 py-0.5 rounded bg-brand hover:bg-brand-hover text-white text-[10px] font-semibold">Upgrade</button>
+              ` : `
+                <button onclick="changeCustomerPlan('${c.id}', 'Pro')" class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-[10px] font-semibold">Downgrade</button>
+              `}
+              ${c.status === 'Active' ? `
+                <button onclick="toggleCustomerPause('${c.id}')" class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px]">Pause</button>
+              ` : `
+                <button onclick="toggleCustomerPause('${c.id}')" class="px-2 py-0.5 rounded bg-accent text-white text-[10px] font-semibold">Resume</button>
+              `}
+              <button onclick="triggerRenewal('${c.id}')" class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-accent text-[10px] font-semibold">Renew</button>
+              <button onclick="cancelCustomerSub('${c.id}')" class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-rose-100 text-rose-600 text-[10px]">Cancel</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    /* ==========================================================
+       AUTONOMOUS BILLING TAB & INVOICE RUNNER
+       ========================================================== */
+    function renderInvoiceTable() {
+      const tbody = document.getElementById('invoiceTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      state.invoices.forEach(inv => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-800/40 transition';
+
+        let badge = inv.status === 'Paid'
+          ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-accent-light dark:bg-slate-800 text-accent">Paid</span>'
+          : inv.status === 'Pending'
+          ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-light dark:bg-slate-800 text-brand">Pending</span>'
+          : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400">Failed</span>';
+
+        tr.innerHTML = `
+          <td class="py-2.5 font-mono font-bold text-brand">${inv.id}</td>
+          <td class="py-2.5 font-semibold text-slate-900 dark:text-white">${inv.customer}</td>
+          <td class="py-2.5 text-slate-600 dark:text-slate-300">${inv.plan}</td>
+          <td class="py-2.5 font-mono text-slate-600 dark:text-slate-300">${formatCurrency(inv.subtotal, { decimals: 2 })}</td>
+          <td class="py-2.5 font-mono text-slate-500 dark:text-slate-400">+${formatCurrency(inv.tax, { decimals: 2 })}</td>
+          <td class="py-2.5 font-mono font-bold text-slate-900 dark:text-white">${formatCurrency(inv.total, { decimals: 2 })}</td>
+          <td class="py-2.5">${badge}</td>
+          <td class="py-2.5 text-right">
+            ${inv.status === 'Pending' ? `
+              <button onclick="reconcilePayment('${inv.id}')" class="px-2.5 py-1 rounded bg-accent hover:bg-accent-hover text-white text-[10px] font-bold">Simulate Pay</button>
+            ` : inv.status === 'Failed' ? `
+              <button onclick="switchTab('recovery')" class="px-2.5 py-1 rounded bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-bold">View Dunning</button>
+            ` : `
+              <button onclick="showToast('Receipt PDF downloaded for ${inv.id}', 'info')" class="text-[11px] text-brand hover:underline font-semibold">Receipt</button>
+            `}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    function runAutonomousBilling() {
+      showToast('Executing Autonomous Recurring Billing Engine...', 'info');
+
+      setTimeout(() => {
+        let count = 0;
+        let sum = 0;
+
+        state.invoices.forEach(inv => {
+          if (inv.status === 'Pending') {
+            inv.status = 'Paid';
+            count++;
+            sum += inv.total;
+          }
+        });
+
+        const activeCust = state.customers.find(c => c.status === 'Active' && c.name === 'Nexus Synthetics');
+        if (activeCust) {
+          const newInv = {
+            id: `INV-2026-0${Math.floor(960 + Math.random() * 30)}`,
+            customer: activeCust.name,
+            plan: `${activeCust.plan} Cloud`,
+            subtotal: activeCust.mrr,
+            tax: Number((activeCust.mrr * 0.08).toFixed(2)),
+            total: Number((activeCust.mrr * 1.08).toFixed(2)),
+            status: 'Paid',
+            date: 'Today (Auto)'
+          };
+          state.invoices.unshift(newInv);
+          count++;
+          sum += newInv.total;
+        }
+
+        renderInvoiceTable();
+        renderInvoiceLedgerTable();
+        recalculateMetrics();
+        showToast(`Billing Complete: ${count} invoices reconciled, ${formatCurrency(sum, { decimals: 2 })} cleared!`, 'success');
+      }, 500);
+    }
+
+    function triggerRenewal(custId) {
+      const cust = state.customers.find(c => c.id === custId);
+      if (!cust) return;
+      cust.status = 'Active';
+      cust.nextBill = 'Dec 01, 2026';
+      showToast(`Scheduled immediate renewal cycle for ${cust.name}!`, 'success');
+      renderCustomerTable();
+      recalculateMetrics();
+    }
+
+    function simulateInvoiceCreation() {
+      const sample = state.customers[0];
+      state.invoices.unshift({
+        id: `INV-2026-0${Math.floor(980 + Math.random() * 19)}`,
+        customer: sample.name,
+        plan: `${sample.plan} Tier`,
+        subtotal: sample.mrr,
+        tax: Number((sample.mrr * 0.08).toFixed(2)),
+        total: Number((sample.mrr * 1.08).toFixed(2)),
+        status: 'Pending',
+        date: 'Today'
+      });
+      renderInvoiceLedgerTable();
+      recalculateMetrics();
+      showToast('Draft invoice created.', 'info');
+    }
+
+    function renderRecoveryTable() {
+      const tbody = document.getElementById('recoveryTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (state.recoveries.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-accent font-semibold">Zero revenue at risk. All accounts reconciled!</td></tr>`;
+        return;
+      }
+
+      state.recoveries.forEach(rec => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-800/40 transition';
+        tr.innerHTML = `
+          <td class="py-2.5">
+            <div class="font-bold text-slate-900 dark:text-white text-xs">${rec.customer}</div>
+            <span class="text-[10px] font-mono text-slate-400">${rec.invId}</span>
+          </td>
+          <td class="py-2.5 font-mono font-bold text-rose-500 text-xs">${formatCurrency(rec.amount, { decimals: 2 })}</td>
+          <td class="py-2.5"><span class="px-2 py-0.5 rounded font-mono text-[10px] bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400">${rec.code}</span></td>
+          <td class="py-2.5 text-slate-600 dark:text-slate-300 text-xs">${rec.diagnosis}</td>
+          <td class="py-2.5 text-brand text-xs font-medium">${rec.recommendation}</td>
+          <td class="py-2.5 text-right">
+            <button onclick="executeSingleRecovery('${rec.id}')" class="px-2.5 py-1 rounded bg-brand hover:bg-brand-hover text-white font-bold text-xs shadow-xs transition">
+              Retry
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function executeSingleRecovery(recId) {
+      const idx = state.recoveries.findIndex(r => r.id === recId);
+      if (idx === -1) return;
+      const rec = state.recoveries[idx];
+
+      showToast(`Smart retry dispatched for ${rec.customer}...`, 'info');
+      setTimeout(() => {
+        const inv = state.invoices.find(i => i.id === rec.invId);
+        if (inv) inv.status = 'Paid';
+        state.recoveries.splice(idx, 1);
+        renderRecoveryTable();
+        renderInvoiceLedgerTable();
+        recalculateMetrics();
+        showToast(`Recovered ${formatCurrency(rec.amount, { decimals: 2 })}!`, 'success');
+      }, 500);
+    }
+
+    function executeAllRecoveryWorkflows() {
+      if (state.recoveries.length === 0) {
+        showToast('No pending recoveries in queue.', 'info');
+        return;
+      }
+      showToast('Executing all recovery workflows...', 'info');
+      setTimeout(() => {
+        state.recoveries = [];
+        renderRecoveryTable();
+        renderInvoiceLedgerTable();
+        recalculateMetrics();
+        showToast('All delinquent invoices recovered autonomously!', 'success');
+      }, 600);
+    }
+
+    function renderChurnRadar() {
+      const container = document.getElementById('churnRiskList');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const atRisk = [
+        { name: 'Apex Dynamics', plan: 'Enterprise', score: 88, reason: 'API call volume down 42%' },
+        { name: 'Vortex Global', plan: 'Pro', score: 79, reason: 'Payment card declined twice' }
+      ];
+
+      atRisk.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'p-2.5 rounded bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1 text-xs';
+        item.innerHTML = `
+          <div class="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200">
+            <span>${c.name} (${c.plan})</span>
+            <span class="text-rose-500 font-bold">Risk: ${c.score}%</span>
+          </div>
+          <p class="text-slate-500 dark:text-slate-400 text-[11px]">${c.reason}</p>
+          <div class="flex justify-end pt-1">
+            <button onclick="showToast('Lock-in offer dispatched for ${c.name}.', 'success')" class="text-brand font-bold text-[11px] hover:underline">Deploy Offer</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function runDigitalTwinSimulation() {
+      const priceDelta = parseFloat(document.getElementById('sliderPriceChange')?.value || 10);
+      const churnTarget = parseFloat(document.getElementById('sliderChurnRate')?.value || 1.5);
+      const growthRate = parseFloat(document.getElementById('sliderAcquisition')?.value || 15);
+      const discountVol = parseFloat(document.getElementById('sliderDiscountVol')?.value || 5);
+      const payFail = parseFloat(document.getElementById('sliderPaymentFail')?.value || 3.2);
+
+      if (document.getElementById('labelPriceChange')) document.getElementById('labelPriceChange').innerText = `${priceDelta > 0 ? '+' : ''}${priceDelta}%`;
+      if (document.getElementById('labelChurnRate')) document.getElementById('labelChurnRate').innerText = `${churnTarget.toFixed(1)}%`;
+      if (document.getElementById('labelAcquisition')) document.getElementById('labelAcquisition').innerText = `${growthRate > 0 ? '+' : ''}${growthRate}%`;
+      if (document.getElementById('labelDiscountVol')) document.getElementById('labelDiscountVol').innerText = `${discountVol}%`;
+      if (document.getElementById('labelPaymentFail')) document.getElementById('labelPaymentFail').innerText = `${payFail.toFixed(1)}%`;
+
+      const currentMRR = state.customers.filter(c => c.status === 'Active').reduce((a, b) => a + b.mrr, 0);
+      const baselineData = [];
+      const simulatedData = [];
+
+      let runBase = currentMRR;
+      let runSim = currentMRR * (1 + (priceDelta / 100) * 0.85) * (1 - (discountVol / 100) * 0.4);
+
+      for (let i = 0; i < 12; i++) {
+        runBase = runBase * 1.03;
+        baselineData.push(Math.round(runBase));
+        
+        const netGrowth = (growthRate / 100) / 2;
+        const netChurn = (churnTarget / 100);
+        const netFailImpact = (payFail / 100) * 0.15;
+        runSim = runSim * (1 + netGrowth - netChurn - netFailImpact);
+        simulatedData.push(Math.round(runSim));
+      }
+
+      const finalSimARR = simulatedData[11] * 12;
+      const finalBaseARR = baselineData[11] * 12;
+      const diffARR = finalSimARR - finalBaseARR;
+      const pct = ((diffARR / finalBaseARR) * 100).toFixed(1);
+
+      if (document.getElementById('simWorstCase')) document.getElementById('simWorstCase').innerText = formatCurrency(Math.round(finalSimARR * 0.82));
+      if (document.getElementById('simExpectedCase')) document.getElementById('simExpectedCase').innerText = formatCurrency(Math.round(finalSimARR));
+      if (document.getElementById('simBestCase')) document.getElementById('simBestCase').innerText = formatCurrency(Math.round(finalSimARR * 1.24));
+      if (document.getElementById('simExpectedDelta')) {
+        document.getElementById('simExpectedDelta').innerText = `${diffARR >= 0 ? '+' : ''}${formatCurrency(Math.round(diffARR))} (${diffARR >= 0 ? '+' : ''}${pct}%)`;
+      }
+
+      if (digitalTwinChartInstance) {
+        const factor = state.currency === 'USD' ? 1 : state.fxRate;
+        digitalTwinChartInstance.data.datasets[0].data = baselineData.map(v => v * factor);
+        digitalTwinChartInstance.data.datasets[1].data = simulatedData.map(v => v * factor);
+        digitalTwinChartInstance.update();
+      }
+    }
+
+    function resetSimulationSliders() {
+      document.getElementById('sliderPriceChange').value = 10;
+      document.getElementById('sliderChurnRate').value = 1.5;
+      document.getElementById('sliderAcquisition').value = 15;
+      if (document.getElementById('sliderDiscountVol')) document.getElementById('sliderDiscountVol').value = 5;
+      if (document.getElementById('sliderPaymentFail')) document.getElementById('sliderPaymentFail').value = 3.2;
+      runDigitalTwinSimulation();
+      showToast('Simulation sliders reset to defaults.', 'info');
+    }
+
+    function approveStrategy(stratId) {
+      const btn = document.getElementById(`btn-strat-${stratId}`);
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = 'Executed ✓';
+        btn.className = 'mt-3 w-full py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-500 text-xs font-bold cursor-not-allowed';
+      }
+      showToast(`Strategy #${stratId} approved and executed.`, 'success');
+    }
+
+    function toggleCopilot(optionalPrompt = null) {
+      const drawer = document.getElementById('copilotDrawer');
+      const isOpen = !drawer.classList.contains('translate-x-full');
+      if (isOpen) {
+        drawer.classList.add('translate-x-full');
+      } else {
+        drawer.classList.remove('translate-x-full');
+        if (optionalPrompt) askCopilotPredefined(optionalPrompt);
+      }
+    }
+
+    function handleCopilotSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('copilotInput');
+      const q = input.value.trim();
+      if (!q) return;
+      input.value = '';
+      sendCopilotMessage(q);
+    }
+
+    function askCopilotPredefined(promptText) {
+      document.getElementById('copilotDrawer').classList.remove('translate-x-full');
+      sendCopilotMessage(promptText);
+    }
+
+    function sendCopilotMessage(userQuery) {
+      const stream = document.getElementById('copilotChatStream');
+      const userBubble = document.createElement('div');
+      userBubble.className = 'p-2 rounded bg-brand text-white ml-4 text-xs font-medium';
+      userBubble.innerText = userQuery;
+      stream.appendChild(userBubble);
+
+      setTimeout(() => {
+        const activeCusts = state.customers.filter(c => c.status === 'Active');
+        const mrr = activeCusts.reduce((a, b) => a + b.mrr, 0);
+
+        const aiBubble = document.createElement('div');
+        aiBubble.className = 'p-2 rounded bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 mr-4 text-xs border border-slate-200 dark:border-slate-700';
+        aiBubble.innerHTML = `Active customers: <strong>${activeCusts.length}</strong>. Total MRR: <strong>${formatCurrency(mrr)}</strong> (${formatCurrency(mrr * 12)} ARR). System health nominal.`;
+        stream.appendChild(aiBubble);
+        stream.scrollTop = stream.scrollHeight;
+      }, 400);
+    }
+
+    function renderActivityFeed() {
+      const tbody = document.getElementById('activityFeedBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      state.activityLog.slice(0, 5).forEach(act => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-800/40 transition';
+        tr.innerHTML = `
+          <td class="py-2 font-bold text-slate-900 dark:text-white text-xs">${act.customer}</td>
+          <td class="py-2 text-slate-600 dark:text-slate-300">${act.event}</td>
+          <td class="py-2 text-slate-500 dark:text-slate-400 font-mono">${act.plan}</td>
+          <td class="py-2 font-mono font-bold text-accent text-xs">${formatCurrency(act.val, { decimals: 2 })}</td>
+          <td class="py-2"><span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">${act.status}</span></td>
+          <td class="py-2 text-right text-slate-400 text-xs">${act.time}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'pointer-events-auto flex items-center gap-2 px-3 py-2 rounded-lg shadow-lg text-xs font-bold transition-all duration-200 transform translate-y-2 opacity-0 bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border border-slate-700 dark:border-slate-300';
+      
+      if (type === 'success') {
+        toast.className = 'pointer-events-auto flex items-center gap-2 px-3 py-2 rounded-lg shadow-lg text-xs font-bold transition-all duration-200 transform translate-y-2 opacity-0 bg-accent text-white';
+      } else if (type === 'error') {
+        toast.className = 'pointer-events-auto flex items-center gap-2 px-3 py-2 rounded-lg shadow-lg text-xs font-bold transition-all duration-200 transform translate-y-2 opacity-0 bg-rose-600 text-white';
+      }
+      
+      toast.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5 shrink-0"></i><span>${message}</span>`;
+
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 20);
+      setTimeout(() => {
+        toast.classList.add('opacity-0');
+        setTimeout(() => toast.remove(), 250);
+      }, 2500);
+    }
+
+    function refreshData() {
+      recalculateMetrics();
+      renderCustomerTable();
+      renderInvoiceLedgerTable();
+      renderRecoveryTable();
+      showToast('State synced with platform database.', 'info');
+    }
+
+    function initAllCharts() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+      const tickColor = isDark ? '#94a3b8' : '#64748b';
+
+      // 1. Overview Trajectory
+      const ctx1 = document.getElementById('overviewRevenueChart').getContext('2d');
+      overviewRevChartInstance = new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct (Actual)', 'Nov (AI)', 'Dec (AI)', 'Jan', 'Feb'],
+          datasets: [
+            {
+              label: 'Actual MRR',
+              data: [54000, 59500, 64200, 71000, 78400, 84250, null, null, null, null],
+              borderColor: '#4f46e5',
+              backgroundColor: 'rgba(79, 70, 229, 0.08)',
+              fill: true,
+              tension: 0.3,
+              borderWidth: 2
+            },
+            {
+              label: 'AI Projected',
+              data: [null, null, null, null, null, 84250, 92400, 101800, 111500, 122000],
+              borderColor: '#059669',
+              borderDash: [4, 4],
+              tension: 0.3,
+              borderWidth: 2,
+              pointBackgroundColor: '#059669'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 } } },
+            y: {
+              grid: { color: gridColor },
+              ticks: {
+                color: tickColor,
+                font: { size: 10 },
+                callback: function(v) {
+                  return state.currency === 'USD' ? '$' + (v / 1000) + 'k' : '₹' + (v / 100000).toFixed(1) + 'L';
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // 2. Plan Doughnut
+      const ctx2 = document.getElementById('overviewPlanPieChart').getContext('2d');
+      overviewPieChartInstance = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: ['Starter', 'Pro', 'Enterprise'],
+          datasets: [{
+            data: [84, 71, 31],
+            backgroundColor: ['#64748b', '#4f46e5', '#059669'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '72%',
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      // 3. Predictive Forecast Corridor
+      const ctx3 = document.getElementById('predictiveForecastChart').getContext('2d');
+      predictiveChartInstance = new Chart(ctx3, {
+        type: 'line',
+        data: {
+          labels: ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M12'],
+          datasets: [
+            {
+              label: 'P90 Optimistic ($k)',
+              data: [84, 95, 107, 120, 134, 150, 168, 186, 206, 228, 252, 280],
+              borderColor: '#059669',
+              tension: 0.3,
+              borderWidth: 2,
+              fill: false
+            },
+            {
+              label: 'P50 Target ($k)',
+              data: [84, 91, 99, 108, 117, 127, 138, 150, 163, 176, 191, 207],
+              borderColor: '#4f46e5',
+              backgroundColor: 'rgba(79, 70, 229, 0.08)',
+              tension: 0.3,
+              fill: true,
+              borderWidth: 2
+            },
+            {
+              label: 'P10 Pessimistic ($k)',
+              data: [84, 86, 89, 93, 97, 101, 106, 112, 117, 123, 129, 135],
+              borderColor: '#e11d48',
+              borderDash: [3, 3],
+              tension: 0.3,
+              borderWidth: 1.5,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 } } },
+            y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 }, callback: v => '$' + v + 'k' } }
+          }
+        }
+      });
+
+      // 4. Digital Twin Simulation
+      const ctx4 = document.getElementById('digitalTwinChart').getContext('2d');
+      digitalTwinChartInstance = new Chart(ctx4, {
+        type: 'line',
+        data: {
+          labels: ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M12'],
+          datasets: [
+            {
+              label: 'Baseline',
+              data: [],
+              borderColor: '#64748b',
+              borderDash: [4, 4],
+              borderWidth: 1.5,
+              fill: false
+            },
+            {
+              label: 'What-If Simulation',
+              data: [],
+              borderColor: '#059669',
+              backgroundColor: 'rgba(5, 150, 105, 0.1)',
+              borderWidth: 2,
+              tension: 0.3,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 } } },
+            y: {
+              grid: { color: gridColor },
+              ticks: {
+                color: tickColor,
+                font: { size: 10 },
+                callback: function(v) {
+                  return state.currency === 'USD' ? '$' + (v / 1000) + 'k' : '₹' + (v / 100000).toFixed(1) + 'L';
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function updateChartThemeColors() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+      const tickColor = isDark ? '#94a3b8' : '#64748b';
+
+      [overviewRevChartInstance, predictiveChartInstance, digitalTwinChartInstance].forEach(chart => {
+        if (chart) {
+          if (chart.options.scales.x) {
+            chart.options.scales.x.grid.color = gridColor;
+            chart.options.scales.x.ticks.color = tickColor;
+          }
+          if (chart.options.scales.y) {
+            chart.options.scales.y.grid.color = gridColor;
+            chart.options.scales.y.ticks.color = tickColor;
+          }
+          chart.update();
+        }
+      });
+    }
+
+    function updateOverviewChart() {
+      const activeMRR = state.customers.filter(c => c.status === 'Active').reduce((a, b) => a + b.mrr, 0);
+      const factor = state.currency === 'USD' ? 1 : state.fxRate;
+      const baseUSDValues = [54000, 59500, 64200, 71000, 78400, activeMRR, 92400, 101800, 111500, 122000];
+
+      if (overviewRevChartInstance) {
+        overviewRevChartInstance.data.datasets[0].data = [
+          baseUSDValues[0] * factor,
+          baseUSDValues[1] * factor,
+          baseUSDValues[2] * factor,
+          baseUSDValues[3] * factor,
+          baseUSDValues[4] * factor,
+          activeMRR * factor,
+          null, null, null, null
+        ];
+        overviewRevChartInstance.data.datasets[1].data = [
+          null, null, null, null, null,
+          activeMRR * factor,
+          baseUSDValues[6] * factor,
+          baseUSDValues[7] * factor,
+          baseUSDValues[8] * factor,
+          baseUSDValues[9] * factor
+        ];
+        overviewRevChartInstance.update();
+      }
+    }
+  </script>
+</body>
+</html>
